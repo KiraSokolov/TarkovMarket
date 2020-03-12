@@ -13,26 +13,44 @@ struct Item : Codable {
     let uid : String
     let price : Int?
     let updated : String?
+    let smallImageURL : String?
+    
+    enum CodingKeys : String, CodingKey {
+        case name
+        case uid
+        case price
+        case updated
+        case smallImageURL = "img"
+    }
 }
 
 class ViewController: UIViewController {
     
     @IBOutlet weak var tableView: UITableView!
+    
+    @IBOutlet weak var searchTextField: UITextField!
+    
+    @IBOutlet weak var searchButton: UIButton!
+    
+    
+    
     var itemArray = [Item]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.delegate = self
         tableView.dataSource = self
+        searchTextField.delegate = self
+        tableView.tableFooterView = UIView()
         //        getAllItems()
-        let items = "Ammo, AK, btc"
-        let favourites = items.wordList
+//        let items = "Ammo, AK, btc"
+//        let favourites = items.wordList
         
-        for favourite in favourites {
-            getPrice(of: favourite)
-        }
-//        getPrice(of: items)
-//        getPrice(of: "btc")
+        //        for favourite in favourites {
+        //            getPrice(of: favourite)
+        //        }
+        //        getPrice(of: items)
+        //        getPrice(of: "btc")
         
         // Do any additional setup after loading the view.
     }
@@ -92,7 +110,8 @@ class ViewController: UIViewController {
                 let item = try JSONDecoder().decode([Item].self, from: data)
                 
                 for item in item {
-                    self.itemArray.append(item)
+                    self.itemArray.insert(item, at: 0)
+                    
                 }
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
@@ -104,25 +123,38 @@ class ViewController: UIViewController {
         
     }
     
+    @IBAction func searchButtonPressed(_ sender: UIButton) {
+        guard let item = searchTextField.text else { return }
+        getPrice(of: item)
+        tableView.reloadData()
+        self.view.endEditing(true)
+    }
     
 }
 
 // #PRAGMA MARK: TableView functions
 
-extension ViewController : UITableViewDataSource, UITableViewDelegate {
+extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        cell.textLabel?.text = itemArray[indexPath.row].name
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ItemTableViewCell", for: indexPath) as! ItemTableViewCell
+        
+        guard let urlString = itemArray[indexPath.row].smallImageURL, let URL = URL(string: urlString) else { return cell }
+        
+        cell.itemImageView?.load(url: URL) {
+            tableView.reloadData()
+        }
+        
+        
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        print(tableView.bounds.size.height / 6)
+        
         return tableView.bounds.size.height / 6
     }
     
@@ -130,12 +162,41 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        textField.resignFirstResponder()
+    }
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        
+        guard let item = searchTextField.text else { return true }
+               getPrice(of: item)
+               tableView.reloadData()
+               self.view.endEditing(true)
+        return true
+    }
+    
+    
+    
     
 }
 
 extension String {
     var wordList: [String] {
-        return components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty       }
+        return components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty
+        }
+    }
+}
+
+extension UIImageView {
+    func load(url: URL, completion: @escaping() -> Void) {
+        DispatchQueue.global().async { [weak self] in
+            if let data = try? Data(contentsOf: url) {
+                if let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        self?.image = image
+                    }
+                }
+            }
+        }
     }
 }
 
