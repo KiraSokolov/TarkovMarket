@@ -50,14 +50,14 @@ class ViewController: UIViewController {
         tableView.tableFooterView = UIView()
         
         
-  
         
-//        let dateString = "2020-03-15T01:38:01.380Z"
+        
+        //        let dateString = "2020-03-15T01:38:01.380Z"
         
         
         //        getAllItems()
-//        let items = "Ammo, AK, btc"
-//        let favourites = items.wordList
+        //        let items = "Ammo, AK, btc"
+        //        let favourites = items.wordList
         
         //        for favourite in favourites {
         //            getPrice(of: favourite)
@@ -136,6 +136,46 @@ class ViewController: UIViewController {
         
     }
     
+    func calculateUpdated(last updated: Date) -> String {
+        let timeUpdatedInHours = (updated.distance(to: Date()) / 3600)
+        var measureOfTime = 0
+        
+        if timeUpdatedInHours / 24.0 > 1 {
+            measureOfTime = Int((timeUpdatedInHours / 24.0).rounded())
+            
+            if measureOfTime == 1 {
+                return "Updated 1 day ago"
+            } else {
+                return "Updated \(measureOfTime) days ago"
+            }
+            
+            
+        }
+            
+        else if timeUpdatedInHours > 1 {
+            measureOfTime = Int(timeUpdatedInHours.rounded())
+            
+            if measureOfTime == 1 {
+                return "Updated 1 hour ago"
+            } else {
+                return "Updated \(measureOfTime) hours ago"
+            }
+        }
+            
+        else if timeUpdatedInHours > 0 {
+            measureOfTime = Int((timeUpdatedInHours * 60.0).rounded())
+            
+            if measureOfTime == 1 {
+                return "Updated 1 minute ago"
+            } else {
+                return "Updated \(measureOfTime) minutes ago"
+            }
+        }
+        else {
+            return "Over a week ago"
+        }
+    }
+    
     @IBAction func searchButtonPressed(_ sender: Any) {
         guard let item = searchTextField.text else { return }
         getPrice(of: item)
@@ -156,7 +196,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         let cell = tableView.dequeueReusableCell(withIdentifier: "ItemTableViewCell", for: indexPath) as! ItemTableViewCell
         
         
-       
+        
         cell.nameLabel.text = itemArray[indexPath.row].name
         
         
@@ -172,7 +212,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         let date = itemArray[indexPath.row].updated
         
         
-//        let dateString = date.trimmingCharacters(in: CharacterSet(charactersIn: "0123456789.").inverted)
+        //        let dateString = date.trimmingCharacters(in: CharacterSet(charactersIn: "0123456789.").inverted)
         let dateStringWithoutT = date.replacingOccurrences(of: "T", with: " ")
         let date2 = dateStringWithoutT.prefix(upTo: dateStringWithoutT.firstIndex(of: ".")!)
         let inputFormatter = DateFormatter()
@@ -181,12 +221,16 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         
         showDate?.addTimeInterval(-14400) // Time according to API is +4hrs from EST
         
-        inputFormatter.dateFormat = "MMM d, h:mm a"
-        let displayDate = inputFormatter.string(from: showDate!)
+        print(calculateUpdated(last: showDate!))
         
         
+//
+//        inputFormatter.dateFormat = "MMM d, h:mm a"
+//        let displayDate = inputFormatter.string(from: showDate!)
+//
+//
         
-        cell.updatedLabel.text = displayDate
+        cell.updatedLabel.text = calculateUpdated(last: showDate!)
         
         
         
@@ -216,7 +260,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
     }
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         
-       searchButtonPressed(self)
+        searchButtonPressed(self)
         return true
     }
     
