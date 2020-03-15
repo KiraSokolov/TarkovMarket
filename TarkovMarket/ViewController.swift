@@ -11,16 +11,22 @@ import UIKit
 struct Item : Codable {
     let name : String
     let uid : String
-    let price : Int?
-    let updated : String?
-    let smallImageURL : String?
+    let price : Int
+    let updated : String
+    let smallImageURL : String
+    let currency : String
+    let slots : Int
+    
     
     enum CodingKeys : String, CodingKey {
-        case name
+        case name = "shortName"
         case uid
         case price
         case updated
-        case smallImageURL = "img"
+        case smallImageURL = "icon"
+        case currency = "traderPriceCur"
+        case slots
+        
     }
 }
 
@@ -42,6 +48,13 @@ class ViewController: UIViewController {
         tableView.dataSource = self
         searchTextField.delegate = self
         tableView.tableFooterView = UIView()
+        
+        
+  
+        
+//        let dateString = "2020-03-15T01:38:01.380Z"
+        
+        
         //        getAllItems()
 //        let items = "Ammo, AK, btc"
 //        let favourites = items.wordList
@@ -110,8 +123,8 @@ class ViewController: UIViewController {
                 let item = try JSONDecoder().decode([Item].self, from: data)
                 
                 for item in item {
-                    self.itemArray.insert(item, at: 0)
                     
+                    self.itemArray.insert(item, at: 0)
                 }
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
@@ -123,7 +136,7 @@ class ViewController: UIViewController {
         
     }
     
-    @IBAction func searchButtonPressed(_ sender: UIButton) {
+    @IBAction func searchButtonPressed(_ sender: Any) {
         guard let item = searchTextField.text else { return }
         getPrice(of: item)
         tableView.reloadData()
@@ -142,9 +155,45 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ItemTableViewCell", for: indexPath) as! ItemTableViewCell
         
-        guard let urlString = itemArray[indexPath.row].smallImageURL, let URL = URL(string: urlString) else { return cell }
         
-        cell.itemImageView?.load(url: URL) {
+       
+        cell.nameLabel.text = itemArray[indexPath.row].name
+        
+        
+        
+        
+        let numberFormatter = NumberFormatter()
+        numberFormatter.numberStyle = .decimal
+        let priceAsInt = Int(itemArray[indexPath.row].price)
+        guard let formattedPrice = numberFormatter.string(from: NSNumber(value: priceAsInt)) else { return cell }
+        let currency = itemArray[indexPath.row].currency
+        cell.priceLabel.text = "Price: \(formattedPrice)" + currency
+        
+        let date = itemArray[indexPath.row].updated
+        
+        
+//        let dateString = date.trimmingCharacters(in: CharacterSet(charactersIn: "0123456789.").inverted)
+        let dateStringWithoutT = date.replacingOccurrences(of: "T", with: " ")
+        let date2 = dateStringWithoutT.prefix(upTo: dateStringWithoutT.firstIndex(of: ".")!)
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd hh:mm:ss"
+        var showDate = inputFormatter.date(from: String(date2))
+        
+        showDate?.addTimeInterval(-14400) // Time according to API is +4hrs from EST
+        
+        inputFormatter.dateFormat = "MMM d, h:mm a"
+        let displayDate = inputFormatter.string(from: showDate!)
+        
+        
+        
+        cell.updatedLabel.text = displayDate
+        
+        
+        
+        
+        
+        guard let url = URL(string: itemArray[indexPath.row].smallImageURL) else { return cell }
+        cell.itemImageView?.load(url: url) {
             tableView.reloadData()
         }
         
@@ -167,10 +216,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
     }
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         
-        guard let item = searchTextField.text else { return true }
-               getPrice(of: item)
-               tableView.reloadData()
-               self.view.endEditing(true)
+       searchButtonPressed(self)
         return true
     }
     
