@@ -13,17 +13,17 @@ struct Item : Codable {
     let uid : String
     let price : Int
     let updated : String
-    let smallImageURL : String
+    let imgBig : String
     let currency : String
     let slots : Int
     
     
     enum CodingKeys : String, CodingKey {
-        case name = "shortName"
+        case name 
         case uid
         case price
         case updated
-        case smallImageURL = "icon"
+        case imgBig
         case currency = "traderPriceCur"
         case slots
         
@@ -38,6 +38,7 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var searchButton: UIButton!
     
+    let apiKey = 
     
     
     var itemArray = [Item]()
@@ -77,7 +78,7 @@ class ViewController: UIViewController {
         let session = URLSession.shared
         
         var request = URLRequest(url: url)
-        request.addValue("", forHTTPHeaderField: "x-api-key")
+        request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
         //        request.addValue("btc", forHTTPHeaderField: "q")
         
         session.dataTask(with: request) { (data, response, error) in
@@ -113,7 +114,7 @@ class ViewController: UIViewController {
         let session = URLSession.shared
         guard let url = components.url else { return }
         var request = URLRequest(url: url)
-        request.addValue("", forHTTPHeaderField: "x-api-key")
+        request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
         //        request.addValue("btc", forHTTPHeaderField: "q")
         
         session.dataTask(with: request) { (data, response, error) in
@@ -216,19 +217,17 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         let dateStringWithoutT = date.replacingOccurrences(of: "T", with: " ")
         let date2 = dateStringWithoutT.prefix(upTo: dateStringWithoutT.firstIndex(of: ".")!)
         let inputFormatter = DateFormatter()
-        inputFormatter.dateFormat = "yyyy-MM-dd hh:mm:ss"
+        
+
+        inputFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         var showDate = inputFormatter.date(from: String(date2))
         
         showDate?.addTimeInterval(-14400) // Time according to API is +4hrs from EST
         
-        print(calculateUpdated(last: showDate!))
         
+        guard let displayDate = showDate else { return cell }
         
-//
-//        inputFormatter.dateFormat = "MMM d, h:mm a"
-//        let displayDate = inputFormatter.string(from: showDate!)
-//
-//
+
         
         cell.updatedLabel.text = calculateUpdated(last: showDate!)
         
@@ -236,7 +235,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         
         
         
-        guard let url = URL(string: itemArray[indexPath.row].smallImageURL) else { return cell }
+        guard let url = URL(string: itemArray[indexPath.row].imgBig) else { return cell }
         cell.itemImageView?.load(url: url) {
             tableView.reloadData()
         }
@@ -248,7 +247,8 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         
-        return tableView.bounds.size.height / 6
+        
+        return tableView.bounds.size.height / 2
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
