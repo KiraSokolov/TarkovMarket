@@ -23,7 +23,7 @@ struct Item : Codable {
         case uid
         case price
         case updated
-        case imgBig
+        case imgBig 
         case currency = "traderPriceCur"
         case slots
         
@@ -38,7 +38,7 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var searchButton: UIButton!
     
-    let apiKey = 
+    let apiKey = ""
     
     
     var itemArray = [Item]()
@@ -206,9 +206,32 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
         let priceAsInt = Int(itemArray[indexPath.row].price)
-        guard let formattedPrice = numberFormatter.string(from: NSNumber(value: priceAsInt)) else { return cell }
+    
+        
+        
+        let slots = itemArray[indexPath.row].slots
+        let pricePerSlot = priceAsInt / slots
+        
+        guard let formattedPrice = numberFormatter.string(from: NSNumber(value: priceAsInt)), let formattedSlotPrice = numberFormatter.string(from: NSNumber(value: pricePerSlot)) else { return cell }
         let currency = itemArray[indexPath.row].currency
+        
+        
+        
+        
         cell.priceLabel.text = "Price: \(formattedPrice)" + currency
+        
+        var slotString = ""
+        if slots == 1 {
+            slotString = "slot"
+        } else {
+            slotString = "slots"
+        }
+        cell.slotsLabel.text = "\(formattedSlotPrice)\(currency) per slot (\(slots) \(slotString))"
+        
+        
+        
+        
+        
         
         let date = itemArray[indexPath.row].updated
         
@@ -229,7 +252,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         
 
         
-        cell.updatedLabel.text = calculateUpdated(last: showDate!)
+        cell.updatedLabel.text = calculateUpdated(last: displayDate)
         
         
         
@@ -237,10 +260,17 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         
         guard let url = URL(string: itemArray[indexPath.row].imgBig) else { return cell }
         cell.itemImageView?.load(url: url) {
+            
+          
+            
             tableView.reloadData()
         }
         
-        
+        if cell.itemImageView.frame.width > cell.itemImageView.frame.height {
+                      cell.itemImageView.contentMode = .scaleAspectFit
+                  } else {
+                      cell.itemImageView.contentMode = .scaleAspectFill
+                  }
         
         return cell
     }

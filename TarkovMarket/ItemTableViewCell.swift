@@ -29,5 +29,9 @@ class ItemTableViewCell: UITableViewCell {
 
         // Configure the view for the selected state
     }
+    
+    override func prepareForReuse() {
+        itemImageView.image = nil
+    }
 
 }
