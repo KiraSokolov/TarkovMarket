@@ -34,7 +34,7 @@ struct Item : Codable {
 class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "en-US"))!
-    private let apiKey = ""
+    private let apiKey = "26ApMhKK9JwUyUGd"
     var itemArray = [Item]()
     
     
@@ -167,11 +167,6 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                     }
                 }
                 
-                if lastString == "reset" {
-                    
-                    print(result)
-                    
-                }
             }
             
             if error != nil || isFinal {
@@ -231,33 +226,33 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     
     
-    func getAllItems() {
-        
-        guard let url = URL(string: "https://tarkov-market.com/api/v1/items/all") else { return }
-        let session = URLSession.shared
-        
-        var request = URLRequest(url: url)
-        request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
-        //        request.addValue("btc", forHTTPHeaderField: "q")
-        
-        session.dataTask(with: request) { (data, response, error) in
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else { return }
-            
-            do {
-                let item = try JSONDecoder().decode([Item].self, from: data)
-                
-                for item in item {
-                    self.itemArray.append(item)
-                }
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                }
-            } catch {
-                print("ERROR")
-            }
-        }.resume()
-        
-    }
+//    func getAllItems() {
+//
+//        guard let url = URL(string: "https://tarkov-market.com/api/v1/items/all") else { return }
+//        let session = URLSession.shared
+//
+//        var request = URLRequest(url: url)
+//        request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
+//        //        request.addValue("btc", forHTTPHeaderField: "q")
+//
+//        session.dataTask(with: request) { (data, response, error) in
+//            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else { return }
+//
+//            do {
+//                let item = try JSONDecoder().decode([Item].self, from: data)
+//
+//                for item in item {
+//                    self.itemArray.append(item)
+//                }
+//                DispatchQueue.main.async {
+//                    self.tableView.reloadData()
+//                }
+//            } catch {
+//                print("ERROR")
+//            }
+//        }.resume()
+//
+//    }
     
     func getPrice(of item: String) {
         
@@ -343,7 +338,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         self.view.endEditing(true)
     }
     
-    @IBAction func microphoneTapped(_ sender: Any) {
+    @IBAction func microphoneTapped(_ sender: Any?) {
         
         if audioEngine.isRunning {
             audioEngine.stop()
