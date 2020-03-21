@@ -142,7 +142,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                 
                 for segment in result.bestTranscription.segments {
                     let lastWordIndex = bestString.index(bestString.startIndex, offsetBy: segment.substringRange.location)
-
+                    
                     
                     lastString = String(bestString.suffix(from: lastWordIndex))
                     firstString = String(bestString.prefix(upTo: lastWordIndex))
@@ -152,7 +152,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                 }
                 if lastString == "search" {
                     
-                    self.searchTextField.text = firstString
+                    
                     self.recognitionTask?.finish()
                     self.recognitionTask = nil
                     
@@ -183,12 +183,19 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                 
                 
                 if !firstString.isEmpty {
-                    var searchTerm = ""
-                    if firstString.lowercased().contains("dash") {
-                        searchTerm = firstString.replacingOccurrences(of: "dash", with: "-")
-                    }
-                    searchTerm = firstString.replacingOccurrences(of: " - ", with: "-")
+                    var searchTerm = firstString
                     
+                    if firstString.lowercased().contains("dash") {
+                        searchTerm = firstString.replacingOccurrences(of: "dash", with: "test")
+                        
+                        
+                    }
+                    
+                    if searchTerm.contains(" – ") {
+                        searchTerm = searchTerm.replacingOccurrences(of: " – ", with: "-")
+                    }
+                    
+                    self.searchTextField.text = searchTerm
                     self.getPrice(of: searchTerm)
                 }
             }
