@@ -34,7 +34,7 @@ struct Item : Codable {
 class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "en-US"))!
-    private let apiKey = "26ApMhKK9JwUyUGd"
+    private let apiKey = ""
     var itemArray = [Item]()
     
     
