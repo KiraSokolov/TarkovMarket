@@ -191,7 +191,9 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                     }
                     
                     self.searchTextField.text = searchTerm
+                    let count = self.itemArray.count
                     self.getPrice(of: searchTerm)
+                    self.compareItemArrays(before: count, after: self.itemArray.count)
                 }
             }
             
@@ -211,7 +213,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             print("audioEngine couldn't start because of an error")
         }
         
-        searchTextField.text = "Say an item followed by the word 'search'"
+        searchTextField.text = "say the item name followed by 'search'"
     }
     
     
@@ -332,10 +334,32 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     }
     
     @IBAction func searchButtonPressed(_ sender: Any) {
-        guard let item = searchTextField.text else { return }
-        getPrice(of: item)
+        
+        if searchTextField.text != "say the item name followed by 'search'" || searchTextField.text != "" {
+            
+
+        guard let item = searchTextField.text, item != "" else { return }
+            let count = itemArray.count
+            getPrice(of: item)
+        
+            compareItemArrays(before: count, after: itemArray.count)
+            
         tableView.reloadData()
         self.view.endEditing(true)
+    
+    }
+    }
+    
+    func compareItemArrays(before: Int, after: Int) {
+        if before == after {
+                       let alert = UIAlertController(title: "No item found", message: "Please try again", preferredStyle: .alert)
+                       self.present(alert, animated: true, completion: nil)
+                       
+                       let timer = DispatchTime.now() + 1.5
+                       DispatchQueue.main.asyncAfter(deadline: timer) {
+                           alert.dismiss(animated: true, completion: nil)
+                       }
+                   }
     }
     
     @IBAction func microphoneTapped(_ sender: Any?) {
