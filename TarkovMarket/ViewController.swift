@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Speech
 
 struct Item : Codable {
     let name : String
@@ -30,18 +31,23 @@ struct Item : Codable {
     }
 }
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, SFSpeechRecognizerDelegate {
+    
+    private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "en-US"))!
+    private let apiKey = "26ApMhKK9JwUyUGd"
+    var itemArray = [Item]()
+    
+    
+    private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
+    private var recognitionTask: SFSpeechRecognitionTask?
+    private let audioEngine = AVAudioEngine()
+    
     
     @IBOutlet weak var tableView: UITableView!
-    
     @IBOutlet weak var searchTextField: UITextField!
-    
     @IBOutlet weak var searchButton: UIButton!
+    @IBOutlet weak var microphoneButton: UIButton!
     
-    let apiKey = ""
-    
-    
-    var itemArray = [Item]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,22 +57,168 @@ class ViewController: UIViewController {
         tableView.tableFooterView = UIView()
         
         
+        microphoneButton.isEnabled = false
+        speechRecognizer.delegate = self
         
+        SFSpeechRecognizer.requestAuthorization { (authStatus) in
+            var isButtonEnabled = false
+            
+            switch authStatus {
+            case .authorized:
+                isButtonEnabled = true
+                
+            case .denied:
+                isButtonEnabled = false
+                print("User denied access to speech recognition")
+                
+            case .restricted:
+                isButtonEnabled = false
+                print("Speech recognition restrictd on this device")
+                
+            case .notDetermined:
+                isButtonEnabled = false
+                print("Speech recognition not yet authorized")
+            }
+            
+            OperationQueue.main.addOperation {
+                self.microphoneButton.isEnabled = isButtonEnabled
+            }
+            
+            
+            
+            
+            
+            //        let dateString = "2020-03-15T01:38:01.380Z"
+            
+            
+            //        getAllItems()
+            //        let items = "Ammo, AK, btc"
+            //        let favourites = items.wordList
+            
+            //        for favourite in favourites {
+            //            getPrice(of: favourite)
+            //        }
+            //        getPrice(of: items)
+            //        getPrice(of: "btc")
+            
+            // Do any additional setup after loading the view.
+        }
+    }
+    func startRecording() {
+        if recognitionTask != nil {
+            recognitionTask?.cancel()
+            recognitionTask = nil
+        }
         
-        //        let dateString = "2020-03-15T01:38:01.380Z"
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(.record)
+            try audioSession.setMode(.measurement)
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+        } catch {
+            print("audioSession properties weren't set because of an error")
+        }
         
+        recognitionRequest = SFSpeechAudioBufferRecognitionRequest()
         
-        //        getAllItems()
-        //        let items = "Ammo, AK, btc"
-        //        let favourites = items.wordList
+        let inputNode = audioEngine.inputNode
         
-        //        for favourite in favourites {
-        //            getPrice(of: favourite)
-        //        }
-        //        getPrice(of: items)
-        //        getPrice(of: "btc")
+        guard let recognitionRequest = recognitionRequest else {
+            fatalError("Unable to create an SFSpeechAudioBufferRecognitionRequest object")
+        }
         
-        // Do any additional setup after loading the view.
+        recognitionRequest.shouldReportPartialResults = true
+        
+        recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest, resultHandler: { (result, error) in
+            var isFinal = false
+            var lastString: String = ""
+            var firstString: String = ""
+            
+            if let result = result {
+                let bestString = result.bestTranscription.formattedString
+                self.searchTextField.text = bestString
+                isFinal = (result.isFinal)
+                
+                
+                for segment in result.bestTranscription.segments {
+                    let lastWordIndex = bestString.index(bestString.startIndex, offsetBy: segment.substringRange.location)
+
+                    
+                    lastString = String(bestString.suffix(from: lastWordIndex))
+                    firstString = String(bestString.prefix(upTo: lastWordIndex))
+                    
+                    
+                    
+                }
+                if lastString == "search" {
+                    
+                    self.searchTextField.text = firstString
+                    self.recognitionTask?.finish()
+                    self.recognitionTask = nil
+                    
+                    // stop audio
+                    recognitionRequest.endAudio()
+                    self.audioEngine.stop()
+                    self.audioEngine.inputNode.removeTap(onBus: 0)
+                    
+                    DispatchQueue.main.async {
+                        self.microphoneButton.setImage(UIImage(systemName: "mic.circle"), for: .normal)
+                        
+                    }
+                }
+                
+                if lastString == "reset" {
+                    
+                    print(result)
+                    
+                }
+            }
+            
+            if error != nil || isFinal {
+                self.audioEngine.stop()
+                inputNode.removeTap(onBus: 0)
+                self.recognitionRequest = nil
+                self.recognitionTask = nil
+                self.microphoneButton.isEnabled = true
+                
+                
+                if !firstString.isEmpty {
+                    var searchTerm = ""
+                    if firstString.lowercased().contains("dash") {
+                        searchTerm = firstString.replacingOccurrences(of: "dash", with: "-")
+                    }
+                    searchTerm = firstString.replacingOccurrences(of: " - ", with: "-")
+                    
+                    self.getPrice(of: searchTerm)
+                }
+            }
+            
+            
+        })
+        
+        let recordingFormat = inputNode.outputFormat(forBus: 0)
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (buffer, when) in
+            self.recognitionRequest?.append(buffer)
+        }
+        
+        audioEngine.prepare()
+        
+        do {
+            try audioEngine.start()
+        } catch {
+            print("audioEngine couldn't start because of an error")
+        }
+        
+        searchTextField.text = "Say an item followed by the word 'search'"
+    }
+    
+    
+    func speechRecognizer(_ speechRecognizer: SFSpeechRecognizer, availabilityDidChange available: Bool) {
+        if available {
+            microphoneButton.isEnabled = true
+        } else {
+            microphoneButton.isEnabled = false
+        }
     }
     
     
@@ -102,7 +254,7 @@ class ViewController: UIViewController {
     
     func getPrice(of item: String) {
         
-        
+        print(item)
         var components = URLComponents()
         components.scheme = "https"
         components.host = "tarkov-market.com"
@@ -184,6 +336,21 @@ class ViewController: UIViewController {
         self.view.endEditing(true)
     }
     
+    @IBAction func microphoneTapped(_ sender: Any) {
+        
+        if audioEngine.isRunning {
+            audioEngine.stop()
+            recognitionRequest?.endAudio()
+            microphoneButton.isEnabled = false
+            microphoneButton.setImage(UIImage(systemName: "mic.circle"), for: .normal)
+            searchTextField.text = nil
+            
+        } else {
+            startRecording()
+            microphoneButton.setImage(UIImage(systemName: "mic.circle.fill"), for: .normal)
+        }
+        
+    }
 }
 
 // #PRAGMA MARK: TableView functions
@@ -206,7 +373,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
         let priceAsInt = Int(itemArray[indexPath.row].price)
-    
+        
         
         
         let slots = itemArray[indexPath.row].slots
@@ -241,7 +408,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         let date2 = dateStringWithoutT.prefix(upTo: dateStringWithoutT.firstIndex(of: ".")!)
         let inputFormatter = DateFormatter()
         
-
+        
         inputFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         var showDate = inputFormatter.date(from: String(date2))
         
@@ -250,7 +417,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         
         guard let displayDate = showDate else { return cell }
         
-
+        
         
         cell.updatedLabel.text = calculateUpdated(last: displayDate)
         
@@ -261,16 +428,16 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         guard let url = URL(string: itemArray[indexPath.row].imgBig) else { return cell }
         cell.itemImageView?.load(url: url) {
             
-          
+            
             
             tableView.reloadData()
         }
         
         if cell.itemImageView.frame.width > cell.itemImageView.frame.height {
-                      cell.itemImageView.contentMode = .scaleAspectFit
-                  } else {
-                      cell.itemImageView.contentMode = .scaleAspectFill
-                  }
+            cell.itemImageView.contentMode = .scaleAspectFit
+        } else {
+            cell.itemImageView.contentMode = .scaleAspectFill
+        }
         
         return cell
     }

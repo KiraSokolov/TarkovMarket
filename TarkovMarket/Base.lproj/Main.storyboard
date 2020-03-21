@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina6_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
-        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -11,6 +10,10 @@
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="TarkovMarket" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="sSz-Mj-l6I"/>
+                        <viewControllerLayoutGuide type="bottom" id="tyY-m6-0N7"/>
+                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -54,7 +57,6 @@
                                                 </label>
                                                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="URC-8g-tJk">
                                                     <rect key="frame" x="20" y="48" width="374" height="225"/>
-                                                    <viewLayoutGuide key="safeArea" id="pqk-7H-qCp"/>
                                                 </imageView>
                                             </subviews>
                                             <constraints>
@@ -81,7 +83,7 @@
                                 </prototypes>
                             </tableView>
                             <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="lYS-TX-zrP">
-                                <rect key="frame" x="20" y="44" width="318" height="34"/>
+                                <rect key="frame" x="44.333333333333343" y="44" width="293.66666666666663" height="34"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" returnKeyType="search"/>
                             </textField>
@@ -92,23 +94,36 @@
                                     <action selector="searchButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Vlw-Hw-fPO"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RQi-hf-XHe">
+                                <rect key="frame" x="9.9999999999999982" y="42" width="24.333333333333329" height="37"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="24"/>
+                                <state key="normal" image="mic.circle" catalog="system">
+                                    <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
+                                </state>
+                                <connections>
+                                    <action selector="microphoneTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="S8C-9R-Ib2"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
-                            <constraint firstItem="2XV-m7-Ytn" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="2" id="4xa-69-60n"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="KGi-mB-Rdn" secondAttribute="trailing" id="GSP-Uw-jbL"/>
-                            <constraint firstItem="KGi-mB-Rdn" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="W7J-Ra-Ofo"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="2XV-m7-Ytn" secondAttribute="trailing" constant="20" id="eBL-0Y-Y8S"/>
+                            <constraint firstItem="2XV-m7-Ytn" firstAttribute="top" secondItem="sSz-Mj-l6I" secondAttribute="bottom" constant="2" id="4xa-69-60n"/>
+                            <constraint firstAttribute="trailing" secondItem="KGi-mB-Rdn" secondAttribute="trailing" id="GSP-Uw-jbL"/>
+                            <constraint firstItem="KGi-mB-Rdn" firstAttribute="top" secondItem="RQi-hf-XHe" secondAttribute="bottom" constant="5" id="JxM-Rn-geG"/>
+                            <constraint firstItem="RQi-hf-XHe" firstAttribute="height" secondItem="lYS-TX-zrP" secondAttribute="height" multiplier="1.08824" id="V78-se-0dS"/>
+                            <constraint firstItem="KGi-mB-Rdn" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="W7J-Ra-Ofo"/>
+                            <constraint firstAttribute="trailing" secondItem="2XV-m7-Ytn" secondAttribute="trailing" constant="20" id="eBL-0Y-Y8S"/>
                             <constraint firstItem="2XV-m7-Ytn" firstAttribute="leading" secondItem="lYS-TX-zrP" secondAttribute="trailing" constant="8" id="hhf-St-mrN"/>
                             <constraint firstItem="KGi-mB-Rdn" firstAttribute="top" secondItem="2XV-m7-Ytn" secondAttribute="bottom" constant="8" id="jOT-3r-XHc"/>
-                            <constraint firstItem="lYS-TX-zrP" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="k7s-2U-hIw"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="KGi-mB-Rdn" secondAttribute="bottom" id="keE-mM-Kwp"/>
+                            <constraint firstItem="tyY-m6-0N7" firstAttribute="top" secondItem="KGi-mB-Rdn" secondAttribute="bottom" id="keE-mM-Kwp"/>
                             <constraint firstItem="KGi-mB-Rdn" firstAttribute="top" secondItem="lYS-TX-zrP" secondAttribute="bottom" constant="6" id="q3N-51-aM7"/>
-                            <constraint firstItem="lYS-TX-zrP" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="rX4-J5-upc"/>
+                            <constraint firstItem="lYS-TX-zrP" firstAttribute="top" secondItem="sSz-Mj-l6I" secondAttribute="bottom" id="rX4-J5-upc"/>
+                            <constraint firstItem="lYS-TX-zrP" firstAttribute="leading" secondItem="RQi-hf-XHe" secondAttribute="trailing" constant="10" id="wNi-t9-pP1"/>
+                            <constraint firstItem="RQi-hf-XHe" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="10" id="zMD-oL-EaG"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
+                        <outlet property="microphoneButton" destination="RQi-hf-XHe" id="BSk-9q-QmU"/>
                         <outlet property="searchButton" destination="2XV-m7-Ytn" id="jPK-Zi-4Sm"/>
                         <outlet property="searchTextField" destination="lYS-TX-zrP" id="Mxw-jr-CTx"/>
                         <outlet property="tableView" destination="KGi-mB-Rdn" id="fVJ-a0-dqa"/>
@@ -119,4 +134,7 @@
             <point key="canvasLocation" x="137.68115942028987" y="126.5625"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="mic.circle" catalog="system" width="64" height="60"/>
+    </resources>
 </document>
