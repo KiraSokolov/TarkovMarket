@@ -213,7 +213,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             print("audioEngine couldn't start because of an error")
         }
         
-        searchTextField.text = "say the item name followed by 'search'"
+        searchTextField.text = "Say the item name followed by 'search'"
     }
     
     
@@ -335,10 +335,10 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     @IBAction func searchButtonPressed(_ sender: Any) {
         
-        if searchTextField.text != "say the item name followed by 'search'" || searchTextField.text != "" {
+//        if searchTextField.text != "Say the item name followed by 'search'" || searchTextField.text != "" {
             
 
-        guard let item = searchTextField.text, item != "" else { return }
+        guard let item = searchTextField.text, item != "" || searchTextField.text != "Say the item name followed by 'search'" else { return }
             let count = itemArray.count
             getPrice(of: item)
         
@@ -347,7 +347,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         tableView.reloadData()
         self.view.endEditing(true)
     
-    }
+//    }
     }
     
     func compareItemArrays(before: Int, after: Int) {
