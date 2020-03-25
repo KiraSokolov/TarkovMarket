@@ -34,8 +34,9 @@ struct Item : Codable {
 class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "en-US"))!
-    private let apiKey = "26ApMhKK9JwUyUGd"
+    private let apiKey = ""
     var itemArray = [Item]()
+    var listening: Bool = false
     
     
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
@@ -56,7 +57,19 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         searchTextField.delegate = self
         tableView.tableFooterView = UIView()
         
+        if traitCollection.userInterfaceStyle == .dark {
+        microphoneButton.setTitleColor(.white, for: .normal)
+        }
         
+        
+        
+        
+            
+        
+        
+
+        microphoneButton.titleLabel?.textAlignment = .center
+        microphoneButton.setTitle("Speech to text searching", for: .normal)
         microphoneButton.isEnabled = false
         speechRecognizer.delegate = self
         
@@ -84,10 +97,6 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                 self.microphoneButton.isEnabled = isButtonEnabled
             }
             
-            
-            
-            
-            
             //        let dateString = "2020-03-15T01:38:01.380Z"
             
             
@@ -104,17 +113,32 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             // Do any additional setup after loading the view.
         }
     }
+    
     func startRecording() {
         if recognitionTask != nil {
             recognitionTask?.cancel()
             recognitionTask = nil
         }
         
+        var isRecording : Bool = false
+        
+        func toggleButton() {
+            isRecording.toggle()
+            if !isRecording {
+                microphoneButton.setTitle("Speech to text searching", for: .normal)
+            } else {
+                microphoneButton.setTitle("Go ahead I'm listening", for: .normal)
+            }
+        }
+        
+        
+//        self.microphoneButton.isEnabled = false
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(.record)
             try audioSession.setMode(.measurement)
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+            toggleButton()
         } catch {
             print("audioSession properties weren't set because of an error")
         }
@@ -134,10 +158,27 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             var lastString: String = ""
             var firstString: String = ""
             
+            
+            func stopRecording() {
+                self.audioEngine.stop()
+                self.recognitionRequest?.endAudio()
+                
+                
+                    self.recognitionTask?.finish()
+
+                
+                self.audioEngine.inputNode.removeTap(onBus: 0);
+                self.audioEngine.inputNode.reset()
+                self.microphoneButton.isEnabled = true
+            }
+
+            
             if let result = result {
                 let bestString = result.bestTranscription.formattedString
                 self.searchTextField.text = bestString
                 isFinal = (result.isFinal)
+                
+                
                 
                 
                 for segment in result.bestTranscription.segments {
@@ -148,34 +189,38 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                     firstString = String(bestString.prefix(upTo: lastWordIndex))
                     
                     
-                    
                 }
                 if lastString == "search" {
                     
                     
-                    self.recognitionTask?.finish()
-                    self.recognitionTask = nil
-                    
-                    // stop audio
-                    recognitionRequest.endAudio()
-                    self.audioEngine.stop()
-                    self.audioEngine.inputNode.removeTap(onBus: 0)
+//                    self.recognitionTask?.finish()
+//                    self.recognitionTask = nil
+//
+//                    // stop audio
+//                    recognitionRequest.endAudio()
+//                    self.audioEngine.stop()
+//                    self.audioEngine.inputNode.removeTap(onBus: 0)
+                    stopRecording()
                     
                     DispatchQueue.main.async {
                         self.microphoneButton.setImage(UIImage(systemName: "mic.circle"), for: .normal)
                         
                     }
                 }
+            
+            } else if result == nil {
+                self.recognitionTask?.cancel()
                 
             }
             
             if error != nil || isFinal {
-                self.audioEngine.stop()
-                inputNode.removeTap(onBus: 0)
-                self.recognitionRequest = nil
-                self.recognitionTask = nil
-                self.microphoneButton.isEnabled = true
-                
+//                self.audioEngine.stop()
+//                inputNode.removeTap(onBus: 0)
+//                self.recognitionRequest = nil
+//                self.recognitionTask = nil
+//                self.microphoneButton.isEnabled = true
+//
+                stopRecording()
                 
                 if !firstString.isEmpty {
                     var searchTerm = firstString
@@ -192,8 +237,10 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                     
                     self.searchTextField.text = searchTerm
                     let count = self.itemArray.count
-                    self.getPrice(of: searchTerm)
-                    self.compareItemArrays(before: count, after: self.itemArray.count)
+                    self.getPrice(of: searchTerm) {
+                        self.compareItemArrays(before: count, after: self.itemArray.count)
+                    }
+                    
                 }
             }
             
@@ -214,6 +261,8 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         }
         
         searchTextField.text = "Say the item name followed by 'search'"
+        
+       
     }
     
     
@@ -228,35 +277,35 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     
     
-//    func getAllItems() {
-//
-//        guard let url = URL(string: "https://tarkov-market.com/api/v1/items/all") else { return }
-//        let session = URLSession.shared
-//
-//        var request = URLRequest(url: url)
-//        request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
-//        //        request.addValue("btc", forHTTPHeaderField: "q")
-//
-//        session.dataTask(with: request) { (data, response, error) in
-//            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else { return }
-//
-//            do {
-//                let item = try JSONDecoder().decode([Item].self, from: data)
-//
-//                for item in item {
-//                    self.itemArray.append(item)
-//                }
-//                DispatchQueue.main.async {
-//                    self.tableView.reloadData()
-//                }
-//            } catch {
-//                print("ERROR")
-//            }
-//        }.resume()
-//
-//    }
+    //    func getAllItems() {
+    //
+    //        guard let url = URL(string: "https://tarkov-market.com/api/v1/items/all") else { return }
+    //        let session = URLSession.shared
+    //
+    //        var request = URLRequest(url: url)
+    //        request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
+    //        //        request.addValue("btc", forHTTPHeaderField: "q")
+    //
+    //        session.dataTask(with: request) { (data, response, error) in
+    //            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else { return }
+    //
+    //            do {
+    //                let item = try JSONDecoder().decode([Item].self, from: data)
+    //
+    //                for item in item {
+    //                    self.itemArray.append(item)
+    //                }
+    //                DispatchQueue.main.async {
+    //                    self.tableView.reloadData()
+    //                }
+    //            } catch {
+    //                print("ERROR")
+    //            }
+    //        }.resume()
+    //
+    //    }
     
-    func getPrice(of item: String) {
+    func getPrice(of item: String, completion: @escaping () -> ()) {
         
         print(item)
         var components = URLComponents()
@@ -289,6 +338,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             } catch {
                 print("ERROR")
             }
+            completion()
         }.resume()
         
     }
@@ -335,31 +385,38 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     @IBAction func searchButtonPressed(_ sender: Any) {
         
-//        if searchTextField.text != "Say the item name followed by 'search'" || searchTextField.text != "" {
+        if searchTextField.text != "Say the item name followed by 'search'" || searchTextField.text != "" {
             
-
-        guard let item = searchTextField.text, item != "" || searchTextField.text != "Say the item name followed by 'search'" else { return }
+            
+            guard let item = searchTextField.text, item != "" else { return }
+            print(itemArray.count)
             let count = itemArray.count
-            getPrice(of: item)
-        
-            compareItemArrays(before: count, after: itemArray.count)
+            getPrice(of: item) {
+                self.compareItemArrays(before: count, after: self.itemArray.count)
+            }
+            //            print(#line, itemArray.count)
+            //            compareItemArrays(before: count, after: itemArray.count)
             
-        tableView.reloadData()
-        self.view.endEditing(true)
-    
-//    }
+            tableView.reloadData()
+            self.view.endEditing(true)
+            
+        }
     }
     
     func compareItemArrays(before: Int, after: Int) {
         if before == after {
-                       let alert = UIAlertController(title: "No item found", message: "Please try again", preferredStyle: .alert)
-                       self.present(alert, animated: true, completion: nil)
-                       
-                       let timer = DispatchTime.now() + 1.5
-                       DispatchQueue.main.asyncAfter(deadline: timer) {
-                           alert.dismiss(animated: true, completion: nil)
-                       }
-                   }
+            
+            DispatchQueue.main.async {
+                
+                let alert = UIAlertController(title: "No item found", message: "Please try again", preferredStyle: .alert)
+                self.present(alert, animated: true, completion: nil)
+                
+                let timer = DispatchTime.now() + 1.5
+                DispatchQueue.main.asyncAfter(deadline: timer) {
+                    alert.dismiss(animated: true, completion: nil)
+                }
+            }
+        }
     }
     
     @IBAction func microphoneTapped(_ sender: Any?) {
@@ -369,11 +426,17 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             recognitionRequest?.endAudio()
             microphoneButton.isEnabled = false
             microphoneButton.setImage(UIImage(systemName: "mic.circle"), for: .normal)
-            searchTextField.text = nil
+            searchTextField.text = ""
             
         } else {
             startRecording()
             microphoneButton.setImage(UIImage(systemName: "mic.circle.fill"), for: .normal)
+            
+            listening = true
+            
+            if listening {
+                print("Listening")
+            }
         }
         
     }

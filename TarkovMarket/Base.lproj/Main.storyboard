@@ -19,7 +19,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="KGi-mB-Rdn">
-                                <rect key="frame" x="0.0" y="84" width="414" height="778"/>
+                                <rect key="frame" x="0.0" y="84" width="414" height="700"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ItemTableViewCell" rowHeight="389" id="bAn-uY-PaY" customClass="ItemTableViewCell" customModule="TarkovMarket" customModuleProvider="target">
@@ -82,8 +82,8 @@
                                     </tableViewCell>
                                 </prototypes>
                             </tableView>
-                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="lYS-TX-zrP">
-                                <rect key="frame" x="44.333333333333343" y="44" width="293.66666666666663" height="34"/>
+                            <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="249" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Search for an item here" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="lYS-TX-zrP">
+                                <rect key="frame" x="20" y="44" width="318" height="34"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" returnKeyType="search"/>
                             </textField>
@@ -94,10 +94,13 @@
                                     <action selector="searchButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Vlw-Hw-fPO"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RQi-hf-XHe">
-                                <rect key="frame" x="9.9999999999999982" y="42" width="24.333333333333329" height="37"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" lineBreakMode="middleTruncation" id="RQi-hf-XHe">
+                                <rect key="frame" x="40" y="792" width="335" height="70"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="24"/>
-                                <state key="normal" image="mic.circle" catalog="system">
+                                <inset key="titleEdgeInsets" minX="10" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                <state key="normal" title="Speech to text searching" image="mic.circle" catalog="system">
+                                    <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
                                     <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
                                 </state>
                                 <connections>
@@ -108,18 +111,18 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="2XV-m7-Ytn" firstAttribute="top" secondItem="sSz-Mj-l6I" secondAttribute="bottom" constant="2" id="4xa-69-60n"/>
+                            <constraint firstItem="RQi-hf-XHe" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="20" id="7fC-GV-POy"/>
+                            <constraint firstItem="lYS-TX-zrP" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="20" id="8MB-Rm-5H1"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="RQi-hf-XHe" secondAttribute="trailing" constant="19" id="Fjm-2z-SLl"/>
+                            <constraint firstItem="tyY-m6-0N7" firstAttribute="top" secondItem="RQi-hf-XHe" secondAttribute="bottom" id="GNm-2I-BHA"/>
                             <constraint firstAttribute="trailing" secondItem="KGi-mB-Rdn" secondAttribute="trailing" id="GSP-Uw-jbL"/>
-                            <constraint firstItem="KGi-mB-Rdn" firstAttribute="top" secondItem="RQi-hf-XHe" secondAttribute="bottom" constant="5" id="JxM-Rn-geG"/>
-                            <constraint firstItem="RQi-hf-XHe" firstAttribute="height" secondItem="lYS-TX-zrP" secondAttribute="height" multiplier="1.08824" id="V78-se-0dS"/>
                             <constraint firstItem="KGi-mB-Rdn" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="W7J-Ra-Ofo"/>
+                            <constraint firstItem="RQi-hf-XHe" firstAttribute="top" secondItem="KGi-mB-Rdn" secondAttribute="bottom" constant="8" id="WXr-hK-95j"/>
                             <constraint firstAttribute="trailing" secondItem="2XV-m7-Ytn" secondAttribute="trailing" constant="20" id="eBL-0Y-Y8S"/>
                             <constraint firstItem="2XV-m7-Ytn" firstAttribute="leading" secondItem="lYS-TX-zrP" secondAttribute="trailing" constant="8" id="hhf-St-mrN"/>
                             <constraint firstItem="KGi-mB-Rdn" firstAttribute="top" secondItem="2XV-m7-Ytn" secondAttribute="bottom" constant="8" id="jOT-3r-XHc"/>
-                            <constraint firstItem="tyY-m6-0N7" firstAttribute="top" secondItem="KGi-mB-Rdn" secondAttribute="bottom" id="keE-mM-Kwp"/>
                             <constraint firstItem="KGi-mB-Rdn" firstAttribute="top" secondItem="lYS-TX-zrP" secondAttribute="bottom" constant="6" id="q3N-51-aM7"/>
                             <constraint firstItem="lYS-TX-zrP" firstAttribute="top" secondItem="sSz-Mj-l6I" secondAttribute="bottom" id="rX4-J5-upc"/>
-                            <constraint firstItem="lYS-TX-zrP" firstAttribute="leading" secondItem="RQi-hf-XHe" secondAttribute="trailing" constant="10" id="wNi-t9-pP1"/>
-                            <constraint firstItem="RQi-hf-XHe" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="10" id="zMD-oL-EaG"/>
                         </constraints>
                     </view>
                     <connections>
