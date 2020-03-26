@@ -41,7 +41,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     private let audioEngine = AVAudioEngine()
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
-    
+    var timer : Timer?
     
     
     @IBOutlet weak var tableView: UITableView!
@@ -61,10 +61,12 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             microphoneButton.setTitleColor(.white, for: .normal)
         }
         
-        microphoneButton.translatesAutoresizingMaskIntoConstraints = false
         
+        searchTextField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
+        microphoneButton.translatesAutoresizingMaskIntoConstraints = false
+        let height = self.view.bounds.height / 10
         microphoneButton.heightAnchor.constraint(equalToConstant: height).isActive = true
-        print(microphoneButton.bounds.height)
+        
         microphoneButton.titleLabel?.textAlignment = .center
         microphoneButton.setTitle("Tap Here for Voice Activation", for: .normal)
         microphoneButton.isEnabled = false
@@ -546,6 +548,8 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
+    
+    // #PRAGMA MARK: Textfield functions
     func textFieldDidEndEditing(_ textField: UITextField) {
         textField.resignFirstResponder()
     }
@@ -554,6 +558,29 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         searchButtonPressed(self)
         return true
     }
+    
+    @objc func textFieldDidChange(_ textfield: UITextField) {
+        if let timer = timer {
+            timer.invalidate()
+        }
+        
+        timer = Timer(timeInterval: 1.0, target: self, selector: #selector(search(_:)), userInfo: textfield.text, repeats: false)
+        RunLoop.current.add(timer!, forMode: RunLoop.Mode(rawValue: "NSDefaultRunLoopMode"))
+        
+        
+    }
+        
+    @objc func search(_ timer: Timer) {
+        if let searchText = timer.userInfo as? String {
+            let count = itemArray.count
+            getPrice(of: searchText) {
+                self.compareItemArrays(before: count, after: self.itemArray.count)
+            }
+        }
+    }
+    
+        
+    
     
     
     
