@@ -61,13 +61,6 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         microphoneButton.setTitleColor(.white, for: .normal)
         }
         
-        
-        
-        
-            
-        
-        
-
         microphoneButton.titleLabel?.textAlignment = .center
         microphoneButton.setTitle("Speech to text searching", for: .normal)
         microphoneButton.isEnabled = false
@@ -86,7 +79,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                 
             case .restricted:
                 isButtonEnabled = false
-                print("Speech recognition restrictd on this device")
+                print("Speech recognition restricted on this device")
                 
             case .notDetermined:
                 isButtonEnabled = false
@@ -124,10 +117,14 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         func toggleButton() {
             isRecording.toggle()
+            
             if !isRecording {
                 microphoneButton.setTitle("Speech to text searching", for: .normal)
+                microphoneButton.setImage(UIImage(systemName: "mic.circle"), for: .normal)
+                
             } else {
                 microphoneButton.setTitle("Go ahead I'm listening", for: .normal)
+                microphoneButton.setImage(UIImage(systemName: "mic.circle.fill"), for: .normal)
             }
         }
         
@@ -203,13 +200,15 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                     stopRecording()
                     
                     DispatchQueue.main.async {
-                        self.microphoneButton.setImage(UIImage(systemName: "mic.circle"), for: .normal)
-                        
+                        toggleButton()
+
                     }
                 }
             
             } else if result == nil {
-                self.recognitionTask?.cancel()
+                stopRecording()
+                toggleButton()
+                
                 
             }
             
@@ -430,8 +429,8 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             
         } else {
             startRecording()
-            microphoneButton.setImage(UIImage(systemName: "mic.circle.fill"), for: .normal)
             
+            microphoneButton.setImage(UIImage(systemName: "mic.circle.fill"), for: .normal)
             listening = true
             
             if listening {
