@@ -38,10 +38,10 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     var itemArray = [Item]()
     var listening: Bool = false
     
-    
+    private let audioEngine = AVAudioEngine()
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
-    private let audioEngine = AVAudioEngine()
+    
     
     
     @IBOutlet weak var tableView: UITableView!
@@ -58,14 +58,37 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         tableView.tableFooterView = UIView()
         
         if traitCollection.userInterfaceStyle == .dark {
-        microphoneButton.setTitleColor(.white, for: .normal)
+            microphoneButton.setTitleColor(.white, for: .normal)
         }
         
+        microphoneButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        microphoneButton.heightAnchor.constraint(equalToConstant: height).isActive = true
+        print(microphoneButton.bounds.height)
         microphoneButton.titleLabel?.textAlignment = .center
-        microphoneButton.setTitle("Speech to text searching", for: .normal)
+        microphoneButton.setTitle("Tap Here for Voice Activation", for: .normal)
         microphoneButton.isEnabled = false
         speechRecognizer.delegate = self
         
+        self.requestSpeechRecognition()
+        
+
+    }
+    //        let dateString = "2020-03-15T01:38:01.380Z"
+    
+    
+    //        getAllItems()
+    //        let items = "Ammo, AK, btc"
+    //        let favourites = items.wordList
+    
+    //        for favourite in favourites {
+    //            getPrice(of: favourite)
+    //        }
+    //        getPrice(of: items)
+    //        getPrice(of: "btc")
+    
+    // Do any additional setup after loading the view.
+    func requestSpeechRecognition() {
         SFSpeechRecognizer.requestAuthorization { (authStatus) in
             var isButtonEnabled = false
             
@@ -84,26 +107,13 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             case .notDetermined:
                 isButtonEnabled = false
                 print("Speech recognition not yet authorized")
+            @unknown default:
+                return
             }
             
             OperationQueue.main.addOperation {
                 self.microphoneButton.isEnabled = isButtonEnabled
             }
-            
-            //        let dateString = "2020-03-15T01:38:01.380Z"
-            
-            
-            //        getAllItems()
-            //        let items = "Ammo, AK, btc"
-            //        let favourites = items.wordList
-            
-            //        for favourite in favourites {
-            //            getPrice(of: favourite)
-            //        }
-            //        getPrice(of: items)
-            //        getPrice(of: "btc")
-            
-            // Do any additional setup after loading the view.
         }
     }
     
@@ -119,7 +129,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             isRecording.toggle()
             
             if !isRecording {
-                microphoneButton.setTitle("Speech to text searching", for: .normal)
+                microphoneButton.setTitle("Tap Here for Voice Activation", for: .normal)
                 microphoneButton.setImage(UIImage(systemName: "mic.circle"), for: .normal)
                 
             } else {
@@ -129,7 +139,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         }
         
         
-//        self.microphoneButton.isEnabled = false
+        //        self.microphoneButton.isEnabled = false
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(.record)
@@ -161,14 +171,14 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                 self.recognitionRequest?.endAudio()
                 
                 
-                    self.recognitionTask?.finish()
-
+                self.recognitionTask?.finish()
+                
                 
                 self.audioEngine.inputNode.removeTap(onBus: 0);
                 self.audioEngine.inputNode.reset()
                 self.microphoneButton.isEnabled = true
             }
-
+            
             
             if let result = result {
                 let bestString = result.bestTranscription.formattedString
@@ -190,21 +200,21 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                 if lastString == "search" {
                     
                     
-//                    self.recognitionTask?.finish()
-//                    self.recognitionTask = nil
-//
-//                    // stop audio
-//                    recognitionRequest.endAudio()
-//                    self.audioEngine.stop()
-//                    self.audioEngine.inputNode.removeTap(onBus: 0)
+                    //                    self.recognitionTask?.finish()
+                    //                    self.recognitionTask = nil
+                    //
+                    //                    // stop audio
+                    //                    recognitionRequest.endAudio()
+                    //                    self.audioEngine.stop()
+                    //                    self.audioEngine.inputNode.removeTap(onBus: 0)
                     stopRecording()
                     
                     DispatchQueue.main.async {
                         toggleButton()
-
+                        
                     }
                 }
-            
+                
             } else if result == nil {
                 stopRecording()
                 toggleButton()
@@ -213,12 +223,12 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             }
             
             if error != nil || isFinal {
-//                self.audioEngine.stop()
-//                inputNode.removeTap(onBus: 0)
-//                self.recognitionRequest = nil
-//                self.recognitionTask = nil
-//                self.microphoneButton.isEnabled = true
-//
+                //                self.audioEngine.stop()
+                //                inputNode.removeTap(onBus: 0)
+                //                self.recognitionRequest = nil
+                //                self.recognitionTask = nil
+                //                self.microphoneButton.isEnabled = true
+                //
                 stopRecording()
                 
                 if !firstString.isEmpty {
@@ -261,7 +271,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         searchTextField.text = "Say the item name followed by 'search'"
         
-       
+        
     }
     
     
@@ -431,11 +441,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             startRecording()
             
             microphoneButton.setImage(UIImage(systemName: "mic.circle.fill"), for: .normal)
-            listening = true
             
-            if listening {
-                print("Listening")
-            }
         }
         
     }
