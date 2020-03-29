@@ -17,6 +17,8 @@ struct Item : Codable {
     let imgBig : String
     let currency : String
     let slots : Int
+    let diff24h : Double
+    let diff7days : Double
     
     
     enum CodingKeys : String, CodingKey {
@@ -27,6 +29,8 @@ struct Item : Codable {
         case imgBig 
         case currency = "traderPriceCur"
         case slots
+        case diff24h
+        case diff7days
         
     }
 }
@@ -35,6 +39,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "en-US"))!
     private let apiKey = ""
+    
     var itemArray = [Item]()
     var listening: Bool = false
     
@@ -125,7 +130,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     func getPrice(of item: String, completion: @escaping () -> ()) {
         
-        print(item)
+        print(#line, item)
         var components = URLComponents()
         components.scheme = "https"
         components.host = "tarkov-market.com"
@@ -267,23 +272,25 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         let cell = tableView.dequeueReusableCell(withIdentifier: "ItemTableViewCell", for: indexPath) as! ItemTableViewCell
         
         
+        let referenceItem = itemArray[indexPath.row]
         
-        cell.nameLabel.text = itemArray[indexPath.row].name
+        
+        cell.nameLabel.text = referenceItem.name
         
         
         
         
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
-        let priceAsInt = Int(itemArray[indexPath.row].price)
+        let priceAsInt = Int(referenceItem.price)
         
         
         
-        let slots = itemArray[indexPath.row].slots
+        let slots = referenceItem.slots
         let pricePerSlot = priceAsInt / slots
         
         guard let formattedPrice = numberFormatter.string(from: NSNumber(value: priceAsInt)), let formattedSlotPrice = numberFormatter.string(from: NSNumber(value: pricePerSlot)) else { return cell }
-        let currency = itemArray[indexPath.row].currency
+        let currency = referenceItem.currency
         
         
         
@@ -300,39 +307,62 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         
         
         
+        let red = UIColor(red: 184.0 / 255.0, green: 48.0 / 255.0, blue: 48.0 / 255.0, alpha: 1)
+        let green = UIColor(red: 49.0 / 255.0, green: 120.0 / 255.0, blue: 79.0 / 255.0, alpha: 1)
+        let redFontAttribute = [NSAttributedString.Key.foregroundColor : red]
+        let greenFontAttribute = [NSAttributedString.Key.foregroundColor : green]
+        let blackFontAttribute = [NSAttributedString.Key.foregroundColor : UIColor.black]
+//        string: "\(referenceItem.diff24h)%", attributes: redFontAttribute)
+        var dayAttributedString : NSMutableAttributedString
+        var weekAttributedString : NSMutableAttributedString
+        let dayLabel = NSMutableAttributedString(string: "Diff in 24h: ", attributes: blackFontAttribute)
+         let weekLabel = NSMutableAttributedString(string: "Diff in 7d: ", attributes: blackFontAttribute)
         
-    
         
-        let date = itemArray[indexPath.row].updated
+//        dayLabel.append(attributedString)
+        
+        if referenceItem.diff24h < 0 {
+            dayAttributedString = NSMutableAttributedString(string: "\(referenceItem.diff24h)%", attributes: redFontAttribute)
+        } else if referenceItem.diff24h > 0 {
+            dayAttributedString = NSMutableAttributedString(string: "\(referenceItem.diff24h)%", attributes: greenFontAttribute)
+        } else {
+            dayAttributedString = NSMutableAttributedString(string: "\(referenceItem.diff24h)%", attributes: blackFontAttribute)
+        }
+        
+        dayLabel.append(dayAttributedString)
+        cell.dayDiffLabel.attributedText = dayLabel
+
+        if referenceItem.diff7days < 0 {
+            weekAttributedString = NSMutableAttributedString(string: "\(referenceItem.diff7days)%", attributes: redFontAttribute)
+        } else if referenceItem.diff7days > 0 {
+            weekAttributedString = NSMutableAttributedString(string: "\(referenceItem.diff7days)%", attributes: greenFontAttribute)
+        } else {
+            weekAttributedString = NSMutableAttributedString(string: "\(referenceItem.diff7days)%", attributes: blackFontAttribute)
+        }
+        
+        weekLabel.append(weekAttributedString)
+        cell.weekDiffLabel.attributedText = weekLabel
+            
+
         
         
-        //        let dateString = date.trimmingCharacters(in: CharacterSet(charactersIn: "0123456789.").inverted)
+        
+        let date = referenceItem.updated
         let dateStringWithoutT = date.replacingOccurrences(of: "T", with: " ")
         let date2 = dateStringWithoutT.prefix(upTo: dateStringWithoutT.firstIndex(of: ".")!)
         let inputFormatter = DateFormatter()
-        
-        
         inputFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         var showDate = inputFormatter.date(from: String(date2))
-        
         showDate?.addTimeInterval(-14400) // Time according to API is +4hrs from EST
-        
-        
         guard let displayDate = showDate else { return cell }
-        
-        
-        
         cell.updatedLabel.text = calculateUpdated(last: displayDate)
         
         
         
         
-        
-        guard let url = URL(string: itemArray[indexPath.row].imgBig) else { return cell }
+        guard let url = URL(string: referenceItem.imgBig) else { return cell }
         cell.itemImageView?.load(url: url) {
-            
-            
-            
+         
             tableView.reloadData()
         }
         
@@ -372,7 +402,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             timer.invalidate()
         }
         
-        timer = Timer(timeInterval: 2.0, target: self, selector: #selector(search(_:)), userInfo: textfield.text, repeats: false)
+        timer = Timer(timeInterval: 1.0, target: self, selector: #selector(search(_:)), userInfo: textfield.text, repeats: false)
         RunLoop.current.add(timer!, forMode: RunLoop.Mode(rawValue: "NSDefaultRunLoopMode"))
         
         
@@ -381,9 +411,12 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
     @objc func search(_ timer: Timer) {
         if let searchText = timer.userInfo as? String {
             let count = itemArray.count
+            
+            if searchText != "" {
             getPrice(of: searchText) {
                 self.compareItemArrays(before: count, after: self.itemArray.count)
                 
+            }
             }
             searchTextField.resignFirstResponder()
         }

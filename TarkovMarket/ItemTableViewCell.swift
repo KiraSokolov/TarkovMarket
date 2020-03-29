@@ -19,6 +19,12 @@ class ItemTableViewCell: UITableViewCell {
     @IBOutlet weak var slotsLabel: UILabel!
     
     @IBOutlet weak var updatedLabel: UILabel!
+    
+    
+    @IBOutlet weak var dayDiffLabel: UILabel!
+    
+    @IBOutlet weak var weekDiffLabel: UILabel!
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
