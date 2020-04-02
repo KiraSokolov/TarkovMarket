@@ -73,17 +73,8 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         tableHeight = tableView.bounds.height
         tableWidth = tableView.bounds.width
-        
 
         
-        let defaults = UserDefaults.standard
-        defaults.set(favourites, forKey: "Favourites")
-        
-        if tableHeight > tableWidth {
-            height = tableView.frame.height / 2
-        } else if tableWidth > tableHeight {
-            height = tableView.frame.height
-        }
         
         //SPINNER
         
@@ -409,7 +400,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
          
             tableView.reloadData()
         }
-        
+//
         if cell.itemImageView.frame.width > cell.itemImageView.frame.height {
             cell.itemImageView.contentMode = .scaleAspectFit
         } else {
@@ -422,18 +413,33 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+//
+
         
-        
-        switch UIDevice.current.orientation {
-        case .landscapeLeft, .landscapeRight:
-            height = tableView.frame.height
-            return height
-        case .portrait, .portraitUpsideDown:
-            height = tableView.frame.height / 2
-            return height
-        default:
-            break
+        if view.frame.height > view.frame.width {
+            height = tableView.bounds.height / 2
+            print(#line)
+        } else {
+            height = tableView.bounds.width / 3
+            print(#line)
         }
+        
+        
+//        switch UIDevice.current.orientation {
+//        case .landscapeLeft, .landscapeRight:
+//            height = tableView.frame.width / 3
+//            print(#line)
+//            return height
+//        case .portrait, .portraitUpsideDown:
+//            height = tableView.frame.height / 2
+//            print(#line)
+//            return height
+//        default:
+//            break
+//        }
+//
+
+
         return height
     }
     
