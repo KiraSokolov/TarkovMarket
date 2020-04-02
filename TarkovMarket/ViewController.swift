@@ -90,7 +90,8 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         let height = self.view.bounds.height / 10
         microphoneButton.heightAnchor.constraint(equalToConstant: height).isActive = true
         
-        microphoneButton.titleLabel?.textAlignment = .center
+        microphoneButton.contentMode = .scaleAspectFit
+        
         microphoneButton.setTitle("Tap Here for Voice Activation", for: .normal)
         microphoneButton.isEnabled = false
         speechRecognizer.delegate = self
@@ -420,7 +421,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             height = tableView.bounds.height / 2
             print(#line)
         } else {
-            height = tableView.bounds.width / 3
+            height = tableView.bounds.width / 3.5
             print(#line)
         }
         
