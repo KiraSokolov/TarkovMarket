@@ -48,6 +48,8 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     private var recognitionTask: SFSpeechRecognitionTask?
     var timer : Timer?
     
+    @IBOutlet weak var spinner: UIActivityIndicatorView!
+    
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var searchTextField: UITextField!
@@ -61,6 +63,10 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         tableView.dataSource = self
         searchTextField.delegate = self
         tableView.tableFooterView = UIView()
+
+        //SPINNER
+        
+        spinner.isHidden = true
         
         if traitCollection.userInterfaceStyle == .dark {
             microphoneButton.setTitleColor(.white, for: .normal)
@@ -130,12 +136,17 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     func getPrice(of item: String, completion: @escaping () -> ()) {
         
+        let itemName = "q"
+        
         print(#line, item)
+        self.spinner.isHidden = false
+        self.spinner.startAnimating()
+        
         var components = URLComponents()
         components.scheme = "https"
         components.host = "tarkov-market.com"
         components.path = "/api/v1/item"
-        let queryItemKey = URLQueryItem(name: "q", value: item)
+        let queryItemKey = URLQueryItem(name: itemName, value: item)
         components.queryItems = [queryItemKey]
         
         
@@ -226,20 +237,28 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
 //        }
 //    }
     
+    
     func compareItemArrays(before: Int, after: Int) {
+        
+
+        DispatchQueue.main.async {
+
+                self.spinner.isHidden = true
+                self.spinner.stopAnimating()
         if before == after {
             
-            DispatchQueue.main.async {
                 
                 let alert = UIAlertController(title: "No item found", message: "Please try again", preferredStyle: .alert)
                 self.present(alert, animated: true, completion: nil)
                 
                 let timer = DispatchTime.now() + 1.5
                 DispatchQueue.main.asyncAfter(deadline: timer) {
+                    
                     alert.dismiss(animated: true, completion: nil)
                 }
             }
         }
+       
     }
     
     @IBAction func microphoneTapped(_ sender: Any?) {
@@ -250,6 +269,8 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             microphoneButton.isEnabled = false
             microphoneButton.setImage(UIImage(systemName: "mic.circle"), for: .normal)
             searchTextField.text = ""
+            
+          
             
         } else {
             startRecording()
@@ -412,13 +433,15 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         if let searchText = timer.userInfo as? String {
             let count = itemArray.count
             
-            if searchText != "" {
+            if searchText != "" && searchText.count > 3 {
             getPrice(of: searchText) {
                 self.compareItemArrays(before: count, after: self.itemArray.count)
+               
                 
             }
+                searchTextField.resignFirstResponder()
             }
-            searchTextField.resignFirstResponder()
+            
         }
     }
 }
@@ -458,9 +481,17 @@ extension ViewController {
         if recognitionTask != nil {
             recognitionTask?.cancel()
             recognitionTask = nil
+            searchTextField.text = ""
+            
+            
+//
+            
+
         }
         
         var isRecording : Bool = false
+        
+     
         
         func toggleButton() {
             isRecording.toggle()
@@ -468,10 +499,13 @@ extension ViewController {
             if !isRecording {
                 microphoneButton.setTitle("Tap Here for Voice Activation", for: .normal)
                 microphoneButton.setImage(UIImage(systemName: "mic.circle"), for: .normal)
+                searchTextField.placeholder = "Search item name"
+             
                 
             } else {
                 microphoneButton.setTitle("Go ahead I'm listening", for: .normal)
                 microphoneButton.setImage(UIImage(systemName: "mic.circle.fill"), for: .normal)
+                searchTextField.placeholder = "Say the item name followed by 'search'"
             }
         }
         
@@ -501,7 +535,8 @@ extension ViewController {
             var isFinal = false
             var lastString: String = ""
             var firstString: String = ""
-            
+            self.spinner.isHidden = false
+            self.spinner.startAnimating()
             
             func stopRecording() {
                 self.audioEngine.stop()
@@ -510,10 +545,16 @@ extension ViewController {
                 
                 self.recognitionTask?.finish()
                 
-                
                 self.audioEngine.inputNode.removeTap(onBus: 0);
                 self.audioEngine.inputNode.reset()
                 self.microphoneButton.isEnabled = true
+                DispatchQueue.main.async {
+                              self.spinner.isHidden = true
+                              self.spinner.stopAnimating()
+                          }
+                
+                toggleButton()
+                
             }
             
             
@@ -555,7 +596,6 @@ extension ViewController {
             } else if result == nil {
                 stopRecording()
                 toggleButton()
-                
                 
             }
             
@@ -606,8 +646,10 @@ extension ViewController {
             print("audioEngine couldn't start because of an error")
         }
         
-        searchTextField.text = "Say the item name followed by 'search'"
-        
+
+        searchTextField.placeholder = "Say the item name followed by 'search'"
+        print(#line, isRecording)
+     
         
     }
     
