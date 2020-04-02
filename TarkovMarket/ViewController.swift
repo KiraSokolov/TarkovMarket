@@ -41,7 +41,6 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     private let apiKey = ""
     
     var itemArray = [Item]()
-    var listening: Bool = false
     var height : CGFloat = 0.0
     
     
@@ -50,6 +49,8 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
     var timer : Timer?
+    var tableHeight : CGFloat = 0.0
+    var tableWidth : CGFloat = 0.0
     
     @IBOutlet weak var spinner: UIActivityIndicatorView!
     
@@ -68,10 +69,10 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         tableView.tableFooterView = UIView()
 
         
-        let tableHeight : CGFloat = tableView.bounds.height
-        let tableWidth : CGFloat = tableView.bounds.width
+        tableHeight = tableView.bounds.height
+        tableWidth = tableView.bounds.width
         
-        print(#line, tableHeight, tableWidth)
+        
         
         if tableHeight > tableWidth {
             height = tableView.frame.height / 2
@@ -348,14 +349,12 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         let redFontAttribute = [NSAttributedString.Key.foregroundColor : red]
         let greenFontAttribute = [NSAttributedString.Key.foregroundColor : green]
         let blackFontAttribute = [NSAttributedString.Key.foregroundColor : UIColor.black]
-//        string: "\(referenceItem.diff24h)%", attributes: redFontAttribute)
+
         var dayAttributedString : NSMutableAttributedString
         var weekAttributedString : NSMutableAttributedString
         let dayLabel = NSMutableAttributedString(string: "Diff in 24h: ", attributes: blackFontAttribute)
          let weekLabel = NSMutableAttributedString(string: "Diff in 7d: ", attributes: blackFontAttribute)
         
-        
-//        dayLabel.append(attributedString)
         
         if referenceItem.diff24h < 0 {
             dayAttributedString = NSMutableAttributedString(string: "\(referenceItem.diff24h)%", attributes: redFontAttribute)
@@ -408,8 +407,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             cell.itemImageView.contentMode = .scaleAspectFill
         }
         
-        print("picture height", cell.itemImageView.bounds.size.height)
-                print("picture width", cell.itemImageView.bounds.size.width)
+        
         
         return cell
     }
@@ -419,8 +417,10 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         
         switch UIDevice.current.orientation {
         case .landscapeLeft, .landscapeRight:
+            height = tableView.frame.height
             return height
         case .portrait, .portraitUpsideDown:
+            height = tableView.frame.height / 2
             return height
         default:
             break
@@ -673,7 +673,7 @@ extension ViewController {
         
 
         searchTextField.placeholder = "Say the item name followed by 'search'"
-        print(#line, isRecording)
+        
      
         
     }
