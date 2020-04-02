@@ -52,12 +52,14 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     var tableHeight : CGFloat = 0.0
     var tableWidth : CGFloat = 0.0
     
+    
+    
+    
     @IBOutlet weak var spinner: UIActivityIndicatorView!
     
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var searchTextField: UITextField!
-    @IBOutlet weak var searchButton: UIButton!
     @IBOutlet weak var microphoneButton: UIButton!
     
     
@@ -72,7 +74,10 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         tableHeight = tableView.bounds.height
         tableWidth = tableView.bounds.width
         
+
         
+        let defaults = UserDefaults.standard
+        defaults.set(favourites, forKey: "Favourites")
         
         if tableHeight > tableWidth {
             height = tableView.frame.height / 2
@@ -233,26 +238,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         }
     }
     
-//    @IBAction func searchButtonPressed(_ sender: Any) {
-//
-//        if searchTextField.text != "Say the item name followed by 'search'" || searchTextField.text != "" {
-//
-//
-//            guard let item = searchTextField.text, item != "" else { return }
-//            print(itemArray.count)
-//            let count = itemArray.count
-//            getPrice(of: item) {
-//                self.compareItemArrays(before: count, after: self.itemArray.count)
-//            }
-//            //            print(#line, itemArray.count)
-//            //            compareItemArrays(before: count, after: itemArray.count)
-//
-//            tableView.reloadData()
-//            self.view.endEditing(true)
-//
-//        }
-//    }
-    
+
     
     func compareItemArrays(before: Int, after: Int) {
         
@@ -278,23 +264,46 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     }
     
     @IBAction func microphoneTapped(_ sender: Any?) {
-        
+
         if audioEngine.isRunning {
             audioEngine.stop()
             recognitionRequest?.endAudio()
             microphoneButton.isEnabled = false
             microphoneButton.setImage(UIImage(systemName: "mic.circle"), for: .normal)
             searchTextField.text = ""
-            
-          
-            
+
+
+
         } else {
             startRecording()
-            
+
             microphoneButton.setImage(UIImage(systemName: "mic.circle.fill"), for: .normal)
-            
+
         }
         
+        
+
+//        let retrievedFavs = UserDefaults.standard.array(forKey: "Favourites")
+//
+//        guard let favourites = retrievedFavs else { return }
+//        let count = itemArray.count
+//
+//        for favourite in favourites {
+//            getPrice(of: favourite as! String) {
+//                self.compareItemArrays(before: count, after: self.itemArray.count)
+//            }
+//        }
+//
+        
+
+        
+        
+        
+        
+        
+        
+        
+//
     }
 }
 
@@ -439,7 +448,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
     }
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         
-//        searchButtonPressed(self) ************* IF I WANT TO RE-ENABLE SEARCH BUTTON ************
+
         return true
     }
     
@@ -458,7 +467,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         if let searchText = timer.userInfo as? String {
             let count = itemArray.count
             
-            if searchText != "" && searchText.count > 3 {
+            if searchText != "" && searchText.count > 2 {
             getPrice(of: searchText) {
                 self.compareItemArrays(before: count, after: self.itemArray.count)
                
