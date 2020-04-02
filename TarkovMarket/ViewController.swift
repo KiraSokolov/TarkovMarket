@@ -42,6 +42,9 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     var itemArray = [Item]()
     var listening: Bool = false
+    var height : CGFloat = 0.0
+    
+    
     
     private let audioEngine = AVAudioEngine()
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
@@ -64,6 +67,18 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         searchTextField.delegate = self
         tableView.tableFooterView = UIView()
 
+        
+        let tableHeight : CGFloat = tableView.bounds.height
+        let tableWidth : CGFloat = tableView.bounds.width
+        
+        print(#line, tableHeight, tableWidth)
+        
+        if tableHeight > tableWidth {
+            height = tableView.frame.height / 2
+        } else if tableWidth > tableHeight {
+            height = tableView.frame.height
+        }
+        
         //SPINNER
         
         spinner.isHidden = true
@@ -393,6 +408,8 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             cell.itemImageView.contentMode = .scaleAspectFill
         }
         
+        print("picture height", cell.itemImageView.bounds.size.height)
+                print("picture width", cell.itemImageView.bounds.size.width)
         
         return cell
     }
@@ -400,7 +417,15 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         
         
-        return tableView.bounds.height / 2
+        switch UIDevice.current.orientation {
+        case .landscapeLeft, .landscapeRight:
+            return height
+        case .portrait, .portraitUpsideDown:
+            return height
+        default:
+            break
+        }
+        return height
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
