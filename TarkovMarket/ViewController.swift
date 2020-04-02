@@ -38,19 +38,18 @@ struct Item : Codable {
 class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "en-US"))!
-    private let apiKey = ""
+    private let apiKey = "26ApMhKK9JwUyUGd"
     
     var itemArray = [Item]()
     var height : CGFloat = 0.0
-    
+    let languageArray = ["en", "ru", "de", "fr", "es", "cn"]
+    var lanuageSelected = "en"
     
     
     private let audioEngine = AVAudioEngine()
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
     var timer : Timer?
-    var tableHeight : CGFloat = 0.0
-    var tableWidth : CGFloat = 0.0
     
     
     
@@ -71,12 +70,6 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         tableView.tableFooterView = UIView()
 
         
-        tableHeight = tableView.bounds.height
-        tableWidth = tableView.bounds.width
-
-        
-        
-        //SPINNER
         
         spinner.isHidden = true
         
@@ -159,8 +152,9 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         components.scheme = "https"
         components.host = "tarkov-market.com"
         components.path = "/api/v1/item"
-        let queryItemKey = URLQueryItem(name: itemName, value: item)
-        components.queryItems = [queryItemKey]
+        let queryItemName = URLQueryItem(name: itemName, value: item)
+        let queryLanguage = URLQueryItem(name: "lang", value: lanuageSelected)
+        components.queryItems = [queryItemName, queryLanguage]
         
         
         let session = URLSession.shared
@@ -255,6 +249,8 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
        
     }
     
+    //#PRAGMA MARK: IBACTIONS
+    
     @IBAction func microphoneTapped(_ sender: Any?) {
 
         if audioEngine.isRunning {
@@ -297,11 +293,35 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
 //
     }
+    
+    @IBAction func languageButtonPressed(_ sender: Any) {
+        let alert = UIAlertController(title: "", message: "Select a lanauge", preferredStyle: .actionSheet)
+
+        
+        
+        for lanuage in languageArray {
+            alert.addAction(UIAlertAction(title: lanuage, style: .default, handler: { (_) in
+                self.lanuageSelected = lanuage
+                print(self.lanuageSelected)
+            }))
+        }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+        
+        
+    }
+    
+    
+
+    
+    
 }
 
-// #PRAGMA MARK: TableView functions
+// #PRAGMA MARK: TableView Functions
 
 extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate {
+    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
     }
@@ -419,10 +439,8 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         
         if view.frame.height > view.frame.width {
             height = tableView.bounds.height / 2
-            print(#line)
         } else {
             height = tableView.bounds.width / 3.5
-            print(#line)
         }
         
         

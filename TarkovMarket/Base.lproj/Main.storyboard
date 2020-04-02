@@ -153,7 +153,14 @@
                             <constraint firstItem="jen-Aa-LDf" firstAttribute="leading" secondItem="lYS-TX-zrP" secondAttribute="trailing" constant="-28" id="yma-56-vhg"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="33m-Sa-2Dm"/>
+                    <navigationItem key="navigationItem" id="33m-Sa-2Dm">
+                        <barButtonItem key="leftBarButtonItem" title="Lanuage" id="L7N-QV-PV0">
+                            <connections>
+                                <action selector="languageButtonPressed:" destination="BYZ-38-t0r" id="xrx-SA-e64"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" title="Item" image="star.fill" catalog="system" id="TnY-Bt-xhG"/>
+                    </navigationItem>
                     <connections>
                         <outlet property="microphoneButton" destination="RQi-hf-XHe" id="BSk-9q-QmU"/>
                         <outlet property="searchTextField" destination="lYS-TX-zrP" id="Mxw-jr-CTx"/>
@@ -184,7 +191,9 @@
             <point key="canvasLocation" x="137.68115942028987" y="126.5625"/>
         </scene>
     </scenes>
+    <color key="tintColor" systemColor="systemGreenColor" red="0.20392156859999999" green="0.78039215689999997" blue="0.34901960780000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
     <resources>
         <image name="mic.circle" catalog="system" width="128" height="121"/>
+        <image name="star.fill" catalog="system" width="128" height="116"/>
     </resources>
 </document>
