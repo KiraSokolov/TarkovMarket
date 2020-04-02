@@ -25,6 +25,9 @@ class ItemTableViewCell: UITableViewCell {
     
     @IBOutlet weak var weekDiffLabel: UILabel!
     
+    @IBOutlet weak var favouriteButton: UIButton!
+    
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

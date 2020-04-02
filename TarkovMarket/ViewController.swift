@@ -19,6 +19,7 @@ struct Item : Codable {
     let slots : Int
     let diff24h : Double
     let diff7days : Double
+    let isFavourite : Bool? = false
     
     
     enum CodingKeys : String, CodingKey {
@@ -31,6 +32,7 @@ struct Item : Codable {
         case slots
         case diff24h
         case diff7days
+        case isFavourite
         
     }
 }
@@ -38,12 +40,16 @@ struct Item : Codable {
 class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "en-US"))!
-    private let apiKey = "26ApMhKK9JwUyUGd"
+    private let apiKey = ""
     
     var itemArray = [Item]()
     var height : CGFloat = 0.0
     let languageArray = ["en", "ru", "de", "fr", "es", "cn"]
     var lanuageSelected = "en"
+    
+    
+    var favouriteSet : Set<String> = []
+    var favouritesArray : [String] = []
     
     
     private let audioEngine = AVAudioEngine()
@@ -70,6 +76,10 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         tableView.tableFooterView = UIView()
 
         
+        guard let favouriteArr = UserDefaults.standard.array(forKey: "Favourites") as? [String] else { return }
+        favouriteSet = Set(favouriteArr)
+        favouritesArray = favouriteArr
+        print(#line, favouriteSet)
         
         spinner.isHidden = true
         
@@ -91,7 +101,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         self.requestSpeechRecognition()
         
-
+        
     }
     //        let dateString = "2020-03-15T01:38:01.380Z"
     
@@ -311,6 +321,18 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
     }
     
+    @IBAction func favouriteButtonPressed(_ sender: Any) {
+        itemArray.removeAll()
+        
+        for favourite in favouritesArray {
+            getPrice(of: favourite) {
+                self.compareItemArrays(before: 0, after: self.itemArray.count)
+            }
+        }
+        
+    }
+    
+    
     
 
     
@@ -428,9 +450,32 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             cell.itemImageView.contentMode = .scaleAspectFill
         }
         
+      
+        
+        cell.favouriteButton.addTarget(self, action: #selector(favourited(sender:)), for: .touchUpInside)
+        cell.favouriteButton.tag = indexPath.row
+        
         
         
         return cell
+    }
+    
+    @objc func favourited(sender: UIButton) {
+        let buttonTag = sender.tag
+        
+        
+        if favouriteSet.count < 5 {
+            if !favouriteSet.contains(itemArray[buttonTag].name) {
+            favouriteSet.insert(itemArray[buttonTag].name)
+            } else {
+                favouriteSet.remove(itemArray[buttonTag].name)
+            }
+             favouritesArray = Array(favouriteSet)
+            
+            UserDefaults.standard.set(favouritesArray, forKey: "Favourites")
+        }
+        
+        
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
