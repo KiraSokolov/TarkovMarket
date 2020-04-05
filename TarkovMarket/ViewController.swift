@@ -74,17 +74,24 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         tableView.dataSource = self
         searchTextField.delegate = self
         tableView.tableFooterView = UIView()
-
-        
-        guard let favouriteArr = UserDefaults.standard.array(forKey: "Favourites") as? [String] else { return }
-        favouriteSet = Set(favouriteArr)
-        favouritesArray = favouriteArr
-        print(#line, favouriteSet)
-        
-        spinner.isHidden = true
         
         if traitCollection.userInterfaceStyle == .dark {
-            microphoneButton.setTitleColor(.white, for: .normal)
+            microphoneButton.setTitleColor(.green, for: .normal)
+            print("true")
+        } else {
+            print("false")
+        }
+
+        spinner.isHidden = true
+        
+        
+        
+        
+        if traitCollection.userInterfaceStyle == .dark {
+            microphoneButton.setTitleColor(.green, for: .normal)
+            print("true")
+        } else {
+            print("false")
         }
         
         
@@ -101,6 +108,10 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         self.requestSpeechRecognition()
         
+        guard let favouriteArr = UserDefaults.standard.array(forKey: "Favourites") as? [String] else { return }
+        favouriteSet = Set(favouriteArr)
+        favouritesArray = favouriteArr
+        print(#line, favouriteSet)
         
     }
     //        let dateString = "2020-03-15T01:38:01.380Z"
@@ -391,7 +402,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         let green = UIColor(red: 49.0 / 255.0, green: 120.0 / 255.0, blue: 79.0 / 255.0, alpha: 1)
         let redFontAttribute = [NSAttributedString.Key.foregroundColor : red]
         let greenFontAttribute = [NSAttributedString.Key.foregroundColor : green]
-        let blackFontAttribute = [NSAttributedString.Key.foregroundColor : UIColor.black]
+        let blackFontAttribute = [NSAttributedString.Key.foregroundColor : UIColor.darkGray]
 
         var dayAttributedString : NSMutableAttributedString
         var weekAttributedString : NSMutableAttributedString
@@ -455,6 +466,12 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         cell.favouriteButton.addTarget(self, action: #selector(favourited(sender:)), for: .touchUpInside)
         cell.favouriteButton.tag = indexPath.row
         
+        if favouriteSet.contains(referenceItem.name) {
+            cell.favouriteButton.setImage(UIImage(systemName: "star.fill"), for: .normal)
+        } else {
+            cell.favouriteButton.setImage(UIImage(systemName: "star"), for: .normal)
+        }
+        
         
         
         return cell
@@ -462,8 +479,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
     
     @objc func favourited(sender: UIButton) {
         let buttonTag = sender.tag
-        
-        
+
         if favouriteSet.count < 5 {
             if !favouriteSet.contains(itemArray[buttonTag].name) {
             favouriteSet.insert(itemArray[buttonTag].name)
@@ -475,6 +491,10 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             UserDefaults.standard.set(favouritesArray, forKey: "Favourites")
         }
         
+//        let indexPathRow : Int = 0
+        let indexPosition = IndexPath(row: buttonTag, section: 0)
+        tableView.reloadRows(at: [indexPosition], with: .none)
+        
         
     }
     
@@ -483,9 +503,11 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
 
         
         if view.frame.height > view.frame.width {
-            height = tableView.bounds.height / 2
+            height = tableView.bounds.height / 2.5
+            
         } else {
             height = tableView.bounds.width / 3.5
+            
         }
         
         
