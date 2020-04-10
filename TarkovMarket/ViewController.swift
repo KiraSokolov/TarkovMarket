@@ -43,7 +43,7 @@ struct Item : Codable {
 class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "en-US"))!
-    private let apiKey = "26ApMhKK9JwUyUGd"
+    private let apiKey = ""
     
     var itemArray = [Item]()
     var height : CGFloat = 0.0
@@ -78,7 +78,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         tableView.dataSource = self
         searchTextField.delegate = self
         tableView.tableFooterView = UIView()
-
+        
         
         if traitCollection.userInterfaceStyle == .dark {
             microphoneButton.setTitleColor(.green, for: .normal)
@@ -86,7 +86,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         } else {
             print("false")
         }
-
+        
         spinner.isHidden = true
         
         
@@ -117,12 +117,13 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         favouriteSet = Set(favouriteArr)
         favouritesArray = favouriteArr
         
-        
+        microphoneButton.layer.borderWidth = 2
+        microphoneButton.layer.borderColor = UIColor.black.cgColor
         
         
         
     }
-
+    
     
     func getPrice(of item: String, completion: @escaping () -> ()) {
         
@@ -148,7 +149,23 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         //        request.addValue("btc", forHTTPHeaderField: "q")
         
         session.dataTask(with: request) { (data, response, error) in
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else { return }
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else {
+                
+                DispatchQueue.main.async {
+                    
+                    let errorAlert = UIAlertController(title: "Error has occured", message: "Please try again.", preferredStyle: .alert)
+                    
+                    self.present(errorAlert, animated: true, completion: nil)
+                    let dismissTimer = DispatchTime.now() + 1.5
+                    DispatchQueue.main.asyncAfter(deadline: dismissTimer) {
+                        
+                        errorAlert.dismiss(animated: true, completion: nil)
+                        self.spinner.isHidden = true
+                        self.spinner.stopAnimating()
+                    }
+                }
+                
+                return }
             
             do {
                 let item = try JSONDecoder().decode([Item].self, from: data)
@@ -208,79 +225,54 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         }
     }
     
-
+    
     
     func compareItemArrays(before: Int, after: Int) {
         
-
+        
         DispatchQueue.main.async {
-
-                self.spinner.isHidden = true
-                self.spinner.stopAnimating()
-        if before == after {
             
+            self.spinner.isHidden = true
+            self.spinner.stopAnimating()
+            if before == after {
+                
                 
                 let alert = UIAlertController(title: "No item found", message: "Please try again", preferredStyle: .alert)
                 self.present(alert, animated: true, completion: nil)
                 
-                let timer = DispatchTime.now() + 1.5
-                DispatchQueue.main.asyncAfter(deadline: timer) {
+                let dismissTimer = DispatchTime.now() + 1.5
+                DispatchQueue.main.asyncAfter(deadline: dismissTimer) {
                     
                     alert.dismiss(animated: true, completion: nil)
+                    
                 }
             }
         }
-       
+        
     }
     
     //#PRAGMA MARK: IBACTIONS
     
     @IBAction func microphoneTapped(_ sender: Any?) {
-
+        
         if audioEngine.isRunning {
             audioEngine.stop()
             recognitionRequest?.endAudio()
             microphoneButton.isEnabled = false
             microphoneButton.setImage(UIImage(systemName: "mic.circle"), for: .normal)
             searchTextField.text = ""
-
-
-
+ 
         } else {
             startRecording()
-
+            
             microphoneButton.setImage(UIImage(systemName: "mic.circle.fill"), for: .normal)
-
+            
         }
-        
-        
-
-//        let retrievedFavs = UserDefaults.standard.array(forKey: "Favourites")
-//
-//        guard let favourites = retrievedFavs else { return }
-//        let count = itemArray.count
-//
-//        for favourite in favourites {
-//            getPrice(of: favourite as! String) {
-//                self.compareItemArrays(before: count, after: self.itemArray.count)
-//            }
-//        }
-//
-        
-
-        
-        
-        
-        
-        
-        
-        
-//
     }
     
     @IBAction func languageButtonPressed(_ sender: Any) {
         let alert = UIAlertController(title: "", message: "Select a lanauge", preferredStyle: .actionSheet)
-
+        
         
         
         for lanuage in languageArray {
@@ -312,7 +304,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
 
 extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFieldDelegate {
     
-
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
     }
@@ -351,12 +343,12 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             guard let formattedTraderPrice = numberFormatter.string(from: NSNumber(value: traderPrice)) else { return cell }
             
             cell.traderPriceLabel.text = "\(traderName) will buy for \(formattedTraderPrice)\(currency)"
-              
+            
         } else {
             cell.traderPriceLabel.text = ""
         }
-       
-      
+        
+        
         cell.priceLabel.text = "Price: \(formattedPrice)" + currency
         
         var slotString = ""
@@ -374,11 +366,11 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         let redFontAttribute = [NSAttributedString.Key.foregroundColor : red]
         let greenFontAttribute = [NSAttributedString.Key.foregroundColor : green]
         let blackFontAttribute = [NSAttributedString.Key.foregroundColor : UIColor.darkGray]
-
+        
         var dayAttributedString : NSMutableAttributedString
         var weekAttributedString : NSMutableAttributedString
         let dayLabel = NSMutableAttributedString(string: "Diff in 24h: ", attributes: blackFontAttribute)
-         let weekLabel = NSMutableAttributedString(string: "Diff in 7d: ", attributes: blackFontAttribute)
+        let weekLabel = NSMutableAttributedString(string: "Diff in 7d: ", attributes: blackFontAttribute)
         
         
         if referenceItem.diff24h < 0 {
@@ -391,7 +383,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         
         dayLabel.append(dayAttributedString)
         cell.dayDiffLabel.attributedText = dayLabel
-
+        
         if referenceItem.diff7days < 0 {
             weekAttributedString = NSMutableAttributedString(string: "\(referenceItem.diff7days)%", attributes: redFontAttribute)
         } else if referenceItem.diff7days > 0 {
@@ -402,8 +394,8 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         
         weekLabel.append(weekAttributedString)
         cell.weekDiffLabel.attributedText = weekLabel
-            
-
+        
+        
         
         
         
@@ -422,17 +414,17 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         
         guard let url = URL(string: referenceItem.imgBig) else { return cell }
         cell.itemImageView?.load(url: url) {
-         
+            
             tableView.reloadData()
         }
-//
+        //
         if cell.itemImageView.frame.width > cell.itemImageView.frame.height {
             cell.itemImageView.contentMode = .scaleAspectFit
         } else {
             cell.itemImageView.contentMode = .scaleAspectFill
         }
         
-      
+        
         
         cell.favouriteButton.addTarget(self, action: #selector(favourited(sender:)), for: .touchUpInside)
         cell.favouriteButton.tag = indexPath.row
@@ -446,7 +438,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             cell.favouriteButton.setTitle("Favorite", for: .normal)
         }
         
-    
+        
         
         
         
@@ -455,19 +447,18 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
     
     @objc func favourited(sender: UIButton) {
         let buttonTag = sender.tag
-
+        
         if favouriteSet.count < 5 {
             if !favouriteSet.contains(itemArray[buttonTag].name) {
-            favouriteSet.insert(itemArray[buttonTag].name)
+                favouriteSet.insert(itemArray[buttonTag].name)
             } else {
                 favouriteSet.remove(itemArray[buttonTag].name)
             }
-             favouritesArray = Array(favouriteSet)
+            favouritesArray = Array(favouriteSet)
             
             UserDefaults.standard.set(favouritesArray, forKey: "Favourites")
         }
         
-//        let indexPathRow : Int = 0
         let indexPosition = IndexPath(row: buttonTag, section: 0)
         tableView.reloadRows(at: [indexPosition], with: .none)
         
@@ -475,8 +466,8 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//
-
+        //
+        
         
         if view.frame.height > view.frame.width {
             height = tableView.bounds.height / 2.5
@@ -487,21 +478,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         }
         
         
-//        switch UIDevice.current.orientation {
-//        case .landscapeLeft, .landscapeRight:
-//            height = tableView.frame.width / 3
-//            print(#line)
-//            return height
-//        case .portrait, .portraitUpsideDown:
-//            height = tableView.frame.height / 2
-//            print(#line)
-//            return height
-//        default:
-//            break
-//        }
-//
-
-
+        
         return height
     }
     
@@ -516,7 +493,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
     }
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         
-
+        
         return true
     }
     
@@ -530,17 +507,17 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         
         
     }
-        
+    
     @objc func search(_ timer: Timer) {
         if let searchText = timer.userInfo as? String {
             let count = itemArray.count
             
             if searchText != "" && searchText.count > 2 {
-            getPrice(of: searchText) {
-                self.compareItemArrays(before: count, after: self.itemArray.count)
-               
-                
-            }
+                getPrice(of: searchText) {
+                    self.compareItemArrays(before: count, after: self.itemArray.count)
+                    
+                    
+                }
                 searchTextField.resignFirstResponder()
             }
             
@@ -586,14 +563,14 @@ extension ViewController {
             searchTextField.text = ""
             
             
-//
+            //
             
-
+            
         }
         
         var isRecording : Bool = false
         
-     
+        
         
         func toggleButton() {
             isRecording.toggle()
@@ -602,7 +579,7 @@ extension ViewController {
                 microphoneButton.setTitle("Tap Here for Voice Activation", for: .normal)
                 microphoneButton.setImage(UIImage(systemName: "mic.circle"), for: .normal)
                 searchTextField.placeholder = "Search item name"
-             
+                
                 
             } else {
                 microphoneButton.setTitle("Go ahead I'm listening", for: .normal)
@@ -651,9 +628,9 @@ extension ViewController {
                 self.audioEngine.inputNode.reset()
                 self.microphoneButton.isEnabled = true
                 DispatchQueue.main.async {
-                              self.spinner.isHidden = true
-                              self.spinner.stopAnimating()
-                          }
+                    self.spinner.isHidden = true
+                    self.spinner.stopAnimating()
+                }
                 
                 toggleButton()
                 
@@ -748,10 +725,10 @@ extension ViewController {
             print("audioEngine couldn't start because of an error")
         }
         
-
+        
         searchTextField.placeholder = "Say the item name followed by 'search'"
         
-     
+        
         
     }
     
