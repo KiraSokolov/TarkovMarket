@@ -9,6 +9,7 @@
 import UIKit
 import Speech
 
+
 struct Item : Codable {
     let name : String
     let uid : String
@@ -19,7 +20,8 @@ struct Item : Codable {
     let slots : Int
     let diff24h : Double
     let diff7days : Double
-    let isFavourite : Bool? = false
+    let traderPrice : Int
+    let traderName : String
     
     
     enum CodingKeys : String, CodingKey {
@@ -32,7 +34,8 @@ struct Item : Codable {
         case slots
         case diff24h
         case diff7days
-        case isFavourite
+        case traderPrice
+        case traderName
         
     }
 }
@@ -40,7 +43,7 @@ struct Item : Codable {
 class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "en-US"))!
-    private let apiKey = ""
+    private let apiKey = "26ApMhKK9JwUyUGd"
     
     var itemArray = [Item]()
     var height : CGFloat = 0.0
@@ -60,6 +63,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     
     
+    
     @IBOutlet weak var spinner: UIActivityIndicatorView!
     
     
@@ -74,6 +78,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         tableView.dataSource = self
         searchTextField.delegate = self
         tableView.tableFooterView = UIView()
+
         
         if traitCollection.userInterfaceStyle == .dark {
             microphoneButton.setTitleColor(.green, for: .normal)
@@ -111,55 +116,13 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         guard let favouriteArr = UserDefaults.standard.array(forKey: "Favourites") as? [String] else { return }
         favouriteSet = Set(favouriteArr)
         favouritesArray = favouriteArr
-        print(#line, favouriteSet)
+        
+        
+        
+        
         
     }
-    //        let dateString = "2020-03-15T01:38:01.380Z"
-    
-    
-    //        getAllItems()
-    //        let items = "Ammo, AK, btc"
-    //        let favourites = items.wordList
-    
-    //        for favourite in favourites {
-    //            getPrice(of: favourite)
-    //        }
-    //        getPrice(of: items)
-    //        getPrice(of: "btc")
-    
-    // Do any additional setup after loading the view.
-    
-    
-    
-    
-    
-    //    func getAllItems() {
-    //
-    //        guard let url = URL(string: "https://tarkov-market.com/api/v1/items/all") else { return }
-    //        let session = URLSession.shared
-    //
-    //        var request = URLRequest(url: url)
-    //        request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
-    //        //        request.addValue("btc", forHTTPHeaderField: "q")
-    //
-    //        session.dataTask(with: request) { (data, response, error) in
-    //            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else { return }
-    //
-    //            do {
-    //                let item = try JSONDecoder().decode([Item].self, from: data)
-    //
-    //                for item in item {
-    //                    self.itemArray.append(item)
-    //                }
-    //                DispatchQueue.main.async {
-    //                    self.tableView.reloadData()
-    //                }
-    //            } catch {
-    //                print("ERROR")
-    //            }
-    //        }.resume()
-    //
-    //    }
+
     
     func getPrice(of item: String, completion: @escaping () -> ()) {
         
@@ -343,11 +306,6 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
     }
     
-    
-    
-
-    
-    
 }
 
 // #PRAGMA MARK: TableView Functions
@@ -369,8 +327,6 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         cell.nameLabel.text = referenceItem.name
         
         
-        
-        
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
         let priceAsInt = Int(referenceItem.price)
@@ -380,12 +336,27 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         let slots = referenceItem.slots
         let pricePerSlot = priceAsInt / slots
         
-        guard let formattedPrice = numberFormatter.string(from: NSNumber(value: priceAsInt)), let formattedSlotPrice = numberFormatter.string(from: NSNumber(value: pricePerSlot)) else { return cell }
+        let traderName = referenceItem.traderName
+        
+        
+        let traderPrice = referenceItem.traderPrice
+        
+        guard let formattedPrice = numberFormatter.string(from: NSNumber(value: priceAsInt)),
+            let formattedSlotPrice = numberFormatter.string(from: NSNumber(value: pricePerSlot))
+            else { return cell }
+        
         let currency = referenceItem.currency
         
-        
-        
-        
+        if traderName != "" {
+            guard let formattedTraderPrice = numberFormatter.string(from: NSNumber(value: traderPrice)) else { return cell }
+            
+            cell.traderPriceLabel.text = "\(traderName) will buy for \(formattedTraderPrice)\(currency)"
+              
+        } else {
+            cell.traderPriceLabel.text = ""
+        }
+       
+      
         cell.priceLabel.text = "Price: \(formattedPrice)" + currency
         
         var slotString = ""
@@ -413,7 +384,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         if referenceItem.diff24h < 0 {
             dayAttributedString = NSMutableAttributedString(string: "\(referenceItem.diff24h)%", attributes: redFontAttribute)
         } else if referenceItem.diff24h > 0 {
-            dayAttributedString = NSMutableAttributedString(string: "\(referenceItem.diff24h)%", attributes: greenFontAttribute)
+            dayAttributedString = NSMutableAttributedString(string: "+\(referenceItem.diff24h)%", attributes: greenFontAttribute)
         } else {
             dayAttributedString = NSMutableAttributedString(string: "\(referenceItem.diff24h)%", attributes: blackFontAttribute)
         }
@@ -424,7 +395,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         if referenceItem.diff7days < 0 {
             weekAttributedString = NSMutableAttributedString(string: "\(referenceItem.diff7days)%", attributes: redFontAttribute)
         } else if referenceItem.diff7days > 0 {
-            weekAttributedString = NSMutableAttributedString(string: "\(referenceItem.diff7days)%", attributes: greenFontAttribute)
+            weekAttributedString = NSMutableAttributedString(string: "+\(referenceItem.diff7days)%", attributes: greenFontAttribute)
         } else {
             weekAttributedString = NSMutableAttributedString(string: "\(referenceItem.diff7days)%", attributes: blackFontAttribute)
         }
@@ -466,11 +437,16 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         cell.favouriteButton.addTarget(self, action: #selector(favourited(sender:)), for: .touchUpInside)
         cell.favouriteButton.tag = indexPath.row
         
+        
         if favouriteSet.contains(referenceItem.name) {
             cell.favouriteButton.setImage(UIImage(systemName: "star.fill"), for: .normal)
+            cell.favouriteButton.setTitle("Favorited", for: .normal)
         } else {
             cell.favouriteButton.setImage(UIImage(systemName: "star"), for: .normal)
+            cell.favouriteButton.setTitle("Favorite", for: .normal)
         }
+        
+    
         
         
         
@@ -788,12 +764,7 @@ extension ViewController {
         }
     }
 }
-extension String {
-    var wordList: [String] {
-        return components(separatedBy: CharacterSet.alphanumerics.inverted).filter { !$0.isEmpty
-        }
-    }
-}
+
 
 extension UIImageView {
     func load(url: URL, completion: @escaping() -> Void) {
@@ -808,4 +779,6 @@ extension UIImageView {
         }
     }
 }
+
+
 

@@ -27,6 +27,8 @@ class ItemTableViewCell: UITableViewCell {
     
     @IBOutlet weak var favouriteButton: UIButton!
     
+    @IBOutlet weak var traderPriceLabel: UILabel!
+    
     
     override func awakeFromNib() {
         super.awakeFromNib()
