@@ -59,7 +59,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
     var timer : Timer?
-    
+    let green = UIColor(red: 49.0 / 255.0, green: 120.0 / 255.0, blue: 79.0 / 255.0, alpha: 1)
     
     
     
@@ -80,13 +80,6 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         tableView.tableFooterView = UIView()
         
         
-        if traitCollection.userInterfaceStyle == .dark {
-            microphoneButton.setTitleColor(.green, for: .normal)
-            print("true")
-        } else {
-            print("false")
-        }
-        
         spinner.isHidden = true
         
         
@@ -94,9 +87,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         if traitCollection.userInterfaceStyle == .dark {
             microphoneButton.setTitleColor(.green, for: .normal)
-            print("true")
-        } else {
-            print("false")
+            
         }
         
         
@@ -117,8 +108,10 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         favouriteSet = Set(favouriteArr)
         favouritesArray = favouriteArr
         
-        microphoneButton.layer.borderWidth = 2
-        microphoneButton.layer.borderColor = UIColor.black.cgColor
+        microphoneButton.layer.borderWidth = 1.5
+        microphoneButton.layer.borderColor = green.cgColor
+        microphoneButton.layer.cornerRadius = 40
+        //        microphoneButton.backgroundColor = green
         
         
         
@@ -169,16 +162,14 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             
             do {
                 let item = try JSONDecoder().decode([Item].self, from: data)
-                
                 for item in item {
-                    
                     self.itemArray.insert(item, at: 0)
                 }
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                 }
             } catch {
-                print("ERROR")
+                print(error.localizedDescription)
             }
             completion()
         }.resume()
@@ -261,7 +252,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             microphoneButton.isEnabled = false
             microphoneButton.setImage(UIImage(systemName: "mic.circle"), for: .normal)
             searchTextField.text = ""
- 
+            
         } else {
             startRecording()
             
@@ -362,7 +353,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         
         
         let red = UIColor(red: 184.0 / 255.0, green: 48.0 / 255.0, blue: 48.0 / 255.0, alpha: 1)
-        let green = UIColor(red: 49.0 / 255.0, green: 120.0 / 255.0, blue: 79.0 / 255.0, alpha: 1)
+        
         let redFontAttribute = [NSAttributedString.Key.foregroundColor : red]
         let greenFontAttribute = [NSAttributedString.Key.foregroundColor : green]
         let blackFontAttribute = [NSAttributedString.Key.foregroundColor : UIColor.darkGray]
@@ -612,10 +603,12 @@ extension ViewController {
         
         recognitionTask = speechRecognizer.recognitionTask(with: recognitionRequest, resultHandler: { (result, error) in
             var isFinal = false
-            var lastString: String = ""
-            var firstString: String = ""
+            var lastString : String = ""
+            var firstString : String = ""
             self.spinner.isHidden = false
             self.spinner.startAnimating()
+            var restart : Bool = false
+            var shouldSearch : Bool = false
             
             func stopRecording() {
                 self.audioEngine.stop()
@@ -630,9 +623,10 @@ extension ViewController {
                 DispatchQueue.main.async {
                     self.spinner.isHidden = true
                     self.spinner.stopAnimating()
+                    toggleButton()
                 }
                 
-                toggleButton()
+                
                 
             }
             
@@ -656,20 +650,35 @@ extension ViewController {
                 }
                 if lastString == "search" {
                     
-                    
-                    //                    self.recognitionTask?.finish()
-                    //                    self.recognitionTask = nil
-                    //
-                    //                    // stop audio
-                    //                    recognitionRequest.endAudio()
-                    //                    self.audioEngine.stop()
-                    //                    self.audioEngine.inputNode.removeTap(onBus: 0)
                     stopRecording()
+                    
+                    restart = true
+                    shouldSearch = true
                     
                     DispatchQueue.main.async {
                         toggleButton()
                         
                     }
+                    
+                    
+                }
+                    
+                else if bestString == "Cancel" || lastString == "cancel" {
+                    stopRecording()
+                    self.searchTextField.text = nil
+                    restart = false
+                    
+                    toggleButton()
+                }
+                    
+                else if bestString == "Reset" || lastString == "reset" {
+                    
+                    stopRecording()
+                    restart = true
+                    self.searchTextField.text = nil
+                    toggleButton()
+                    
+                    
                 }
                 
             } else if result == nil {
@@ -679,19 +688,14 @@ extension ViewController {
             }
             
             if error != nil || isFinal {
-                //                self.audioEngine.stop()
-                //                inputNode.removeTap(onBus: 0)
-                //                self.recognitionRequest = nil
-                //                self.recognitionTask = nil
-                //                self.microphoneButton.isEnabled = true
-                //
+                
                 stopRecording()
                 
                 if !firstString.isEmpty {
                     var searchTerm = firstString
                     
                     if firstString.lowercased().contains("dash") {
-                        searchTerm = firstString.replacingOccurrences(of: "dash", with: "test")
+                        searchTerm = firstString.replacingOccurrences(of: "Dash", with: "test")
                         
                         
                     }
@@ -702,13 +706,21 @@ extension ViewController {
                     
                     self.searchTextField.text = searchTerm
                     let count = self.itemArray.count
-                    self.getPrice(of: searchTerm) {
-                        self.compareItemArrays(before: count, after: self.itemArray.count)
+                    
+                    if restart {
+                        self.microphoneTapped(self)
+                        toggleButton()
+                        if shouldSearch {
+                            self.getPrice(of: searchTerm) {
+                                self.compareItemArrays(before: count, after: self.itemArray.count)
+                            }
+                        }
+                        
                     }
+                    
                     
                 }
             }
-            
             
         })
         
