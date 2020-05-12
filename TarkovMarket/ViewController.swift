@@ -111,7 +111,12 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         microphoneButton.layer.borderWidth = 1.5
         microphoneButton.layer.borderColor = green.cgColor
         microphoneButton.layer.cornerRadius = 40
-        //        microphoneButton.backgroundColor = green
+        microphoneButton.layer.shadowColor = UIColor.black.cgColor
+        microphoneButton.layer.shadowOffset = CGSize(width: 5, height: 5)
+        microphoneButton.layer.shadowRadius = 5
+        microphoneButton.layer.shadowOpacity = 0.5
+        
+        
         
         
         
@@ -288,6 +293,22 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         }
         
     }
+    
+    @IBAction func commandsButtonPressed(_ sender: UIButton) {
+        
+        let commandsString = """
+"Search" after the item name to search
+"Reset" to start over
+"Cancel" to end voice recognition
+"""
+        
+        let alert = UIAlertController(title: "Say", message: commandsString, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+        
+        
+    }
+    
     
 }
 
