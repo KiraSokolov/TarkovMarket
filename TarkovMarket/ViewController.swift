@@ -6,8 +6,12 @@
 //  Copyright © 2020 Will Chew. All rights reserved.
 //
 
+// app-id ca-app-pub-4857948317177675~9672993935
+// add unit-id ca-app-pub-4857948317177675/1514947091
+
 import UIKit
 import Speech
+import GoogleMobileAds
 
 
 struct Item : Codable {
@@ -43,7 +47,7 @@ struct Item : Codable {
 class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "en-US"))!
-    private let apiKey = "26ApMhKK9JwUyUGd"
+    private let apiKey = ""
     
     var itemArray = [Item]()
     var height : CGFloat = 0.0
@@ -71,6 +75,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     @IBOutlet weak var searchTextField: UITextField!
     @IBOutlet weak var microphoneButton: UIButton!
     
+    @IBOutlet weak var bannerView: GADBannerView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -78,10 +83,9 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         tableView.dataSource = self
         searchTextField.delegate = self
         tableView.tableFooterView = UIView()
-        
-        
+
         spinner.isHidden = true
-        
+        bannerView.delegate = self
         
         
         
@@ -117,7 +121,9 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         microphoneButton.layer.shadowOpacity = 0.5
         
         
-        
+        bannerView.adUnitID = "ca-app-pub-4857948317177675/1514947091"
+        bannerView.rootViewController = self
+        bannerView.load(GADRequest())
         
         
     }
@@ -269,8 +275,6 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     @IBAction func languageButtonPressed(_ sender: Any) {
         let alert = UIAlertController(title: "", message: "Select a lanauge", preferredStyle: .actionSheet)
         
-        
-        
         for lanuage in languageArray {
             alert.addAction(UIAlertAction(title: lanuage, style: .default, handler: { (_) in
                 self.lanuageSelected = lanuage
@@ -278,6 +282,12 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             }))
         }
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        
+        if let popoverController = alert.popoverPresentationController {
+            popoverController.sourceView = self.view
+            popoverController.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
+            popoverController.permittedArrowDirections = []
+        }
         self.present(alert, animated: true, completion: nil)
         
         
@@ -478,7 +488,6 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        //
         
         
         if view.frame.height > view.frame.width {
@@ -535,6 +544,24 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             
         }
     }
+}
+
+// #PRAGMA MARK: AD Functions
+
+extension ViewController: GADBannerViewDelegate {
+    
+    func adViewDidReceiveAd(_ bannerView: GADBannerView) {
+        print("Received ad")
+    }
+    
+    func adView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: GADRequestError) {
+        print(error)
+    }
+    
+    
+    
+    
+    
 }
 
 // #PRAGMA MARK : Speech functions

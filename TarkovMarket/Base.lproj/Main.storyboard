@@ -19,7 +19,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="KGi-mB-Rdn">
-                                <rect key="frame" x="0.0" y="142" width="414" height="684"/>
+                                <rect key="frame" x="0.0" y="142" width="414" height="618"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="ItemTableViewCell" rowHeight="256" id="bAn-uY-PaY" customClass="ItemTableViewCell" customModule="TarkovMarket" customModuleProvider="target">
@@ -147,18 +147,6 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocorrectionType="no" returnKeyType="search"/>
                             </textField>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RQi-hf-XHe">
-                                <rect key="frame" x="20" y="834" width="374" height="28"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="23"/>
-                                <inset key="titleEdgeInsets" minX="10" minY="0.0" maxX="0.0" maxY="0.0"/>
-                                <state key="normal" title="Tap here for voice activation" image="mic.circle" catalog="system">
-                                    <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
-                                    <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
-                                </state>
-                                <connections>
-                                    <action selector="microphoneTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="S8C-9R-Ib2"/>
-                                </connections>
-                            </button>
                             <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="medium" translatesAutoresizingMaskIntoConstraints="NO" id="jen-Aa-LDf">
                                 <rect key="frame" x="366" y="105" width="20" height="20"/>
                             </activityIndicatorView>
@@ -173,15 +161,36 @@
                                     <action selector="commandsButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="3EV-I2-urO"/>
                                 </connections>
                             </button>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="15X-An-dn6" customClass="GADBannerView">
+                                <rect key="frame" x="47" y="804" width="320" height="50"/>
+                                <color key="backgroundColor" systemColor="systemBlueColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="6v9-HN-nBy"/>
+                                    <constraint firstAttribute="width" constant="320" id="GLO-Ru-jOS"/>
+                                </constraints>
+                            </view>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RQi-hf-XHe">
+                                <rect key="frame" x="20" y="768" width="374" height="28"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="23"/>
+                                <inset key="titleEdgeInsets" minX="10" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                <state key="normal" title="Tap here for voice activation" image="mic.circle" catalog="system">
+                                    <color key="titleColor" cocoaTouchSystemColor="darkTextColor"/>
+                                    <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
+                                </state>
+                                <connections>
+                                    <action selector="microphoneTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="S8C-9R-Ib2"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="KGi-mB-Rdn" firstAttribute="top" secondItem="agb-PM-PqK" secondAttribute="bottom" constant="10" id="6xM-WY-iSs"/>
                             <constraint firstAttribute="trailing" secondItem="KGi-mB-Rdn" secondAttribute="trailing" id="GSP-Uw-jbL"/>
+                            <constraint firstItem="tyY-m6-0N7" firstAttribute="top" secondItem="15X-An-dn6" secondAttribute="bottom" constant="8" id="Hpz-Xw-U2u"/>
                             <constraint firstItem="jen-Aa-LDf" firstAttribute="centerY" secondItem="lYS-TX-zrP" secondAttribute="centerY" id="JTR-ZT-vcD"/>
                             <constraint firstItem="RQi-hf-XHe" firstAttribute="top" secondItem="KGi-mB-Rdn" secondAttribute="bottom" constant="8" id="N4D-Tr-JgE"/>
                             <constraint firstAttribute="trailing" secondItem="lYS-TX-zrP" secondAttribute="trailing" constant="20" id="S8P-Oo-HTH"/>
-                            <constraint firstItem="tyY-m6-0N7" firstAttribute="top" secondItem="RQi-hf-XHe" secondAttribute="bottom" id="UT5-aT-mzC"/>
+                            <constraint firstItem="15X-An-dn6" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="VTX-KS-EY4"/>
                             <constraint firstItem="KGi-mB-Rdn" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="W7J-Ra-Ofo"/>
                             <constraint firstItem="agb-PM-PqK" firstAttribute="top" secondItem="sSz-Mj-l6I" secondAttribute="bottom" constant="10" id="efg-Gx-UW7"/>
                             <constraint firstItem="RQi-hf-XHe" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="fb1-Pw-NaF"/>
@@ -191,6 +200,7 @@
                             <constraint firstItem="agb-PM-PqK" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="10" id="rUY-hl-Jx8"/>
                             <constraint firstItem="lYS-TX-zrP" firstAttribute="top" secondItem="sSz-Mj-l6I" secondAttribute="bottom" constant="10" id="rX4-J5-upc"/>
                             <constraint firstItem="RQi-hf-XHe" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailingMargin" id="w7l-RE-tl0"/>
+                            <constraint firstItem="15X-An-dn6" firstAttribute="top" secondItem="RQi-hf-XHe" secondAttribute="bottom" constant="8" id="wk6-7t-0w6"/>
                             <constraint firstItem="jen-Aa-LDf" firstAttribute="leading" secondItem="lYS-TX-zrP" secondAttribute="trailing" constant="-28" id="yma-56-vhg"/>
                         </constraints>
                     </view>
@@ -207,6 +217,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="bannerView" destination="15X-An-dn6" id="Imx-JU-a1O"/>
                         <outlet property="microphoneButton" destination="RQi-hf-XHe" id="BSk-9q-QmU"/>
                         <outlet property="searchTextField" destination="lYS-TX-zrP" id="Mxw-jr-CTx"/>
                         <outlet property="spinner" destination="jen-Aa-LDf" id="Lxe-2A-QdV"/>
