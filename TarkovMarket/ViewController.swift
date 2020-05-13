@@ -43,7 +43,7 @@ struct Item : Codable {
 class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "en-US"))!
-    private let apiKey = ""
+    private let apiKey = "26ApMhKK9JwUyUGd"
     
     var itemArray = [Item]()
     var height : CGFloat = 0.0
@@ -93,7 +93,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         searchTextField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
         microphoneButton.translatesAutoresizingMaskIntoConstraints = false
-        let height = self.view.bounds.height / 10
+        let height = self.view.bounds.height / 20
         microphoneButton.heightAnchor.constraint(equalToConstant: height).isActive = true
         
         microphoneButton.contentMode = .scaleAspectFit
@@ -110,7 +110,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         microphoneButton.layer.borderWidth = 1.5
         microphoneButton.layer.borderColor = green.cgColor
-        microphoneButton.layer.cornerRadius = 40
+        microphoneButton.layer.cornerRadius = 20
         microphoneButton.layer.shadowColor = UIColor.black.cgColor
         microphoneButton.layer.shadowOffset = CGSize(width: 5, height: 5)
         microphoneButton.layer.shadowRadius = 5
