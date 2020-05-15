@@ -296,12 +296,15 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     @IBAction func favouriteButtonPressed(_ sender: Any) {
         itemArray.removeAll()
         
+        if !favouritesArray.isEmpty {
         for favourite in favouritesArray {
             getPrice(of: favourite) {
                 self.compareItemArrays(before: 0, after: self.itemArray.count)
             }
         }
-        
+        } else {
+            tableView.reloadData()
+        }
     }
     
     @IBAction func commandsButtonPressed(_ sender: UIButton) {
@@ -457,18 +460,16 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             cell.favouriteButton.setTitle("Favorited", for: .normal)
         } else {
             cell.favouriteButton.setImage(UIImage(systemName: "star"), for: .normal)
-            cell.favouriteButton.setTitle("Favorite", for: .normal)
+            cell.favouriteButton.setTitle("Add to Favorites", for: .normal)
         }
-        
-        
-        
-        
-        
+ 
         return cell
     }
     
     @objc func favourited(sender: UIButton) {
         let buttonTag = sender.tag
+        
+        
         
         if favouriteSet.count < 5 {
             if !favouriteSet.contains(itemArray[buttonTag].name) {

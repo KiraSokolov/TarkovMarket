@@ -81,14 +81,14 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fmy-4c-ZOh">
-                                                    <rect key="frame" x="20" y="222.33333333333334" width="78" height="22.666666666666657"/>
+                                                    <rect key="frame" x="20" y="222.33333333333334" width="121" height="22.666666666666657"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="22.666666666666657" id="96o-ct-9ia"/>
                                                     </constraints>
                                                     <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                                     <inset key="titleEdgeInsets" minX="0.0" minY="3" maxX="0.0" maxY="0.0"/>
                                                     <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="9" maxY="0.0"/>
-                                                    <state key="normal" title="Favourite" image="star" catalog="system">
+                                                    <state key="normal" title="Add to Favorites" image="star" catalog="system">
                                                         <color key="titleColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     </state>
                                                 </button>

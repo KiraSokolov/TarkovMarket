@@ -18,7 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		21C0BDB5241592BE000AF871 /* TarkovMarket.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TarkovMarket.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		21C0BDB5241592BE000AF871 /* Tarkov Market Pal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tarkov Market Pal.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		21C0BDB8241592BE000AF871 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		21C0BDBA241592BE000AF871 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		21C0BDBC241592BE000AF871 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -57,7 +57,7 @@
 		21C0BDB6241592BE000AF871 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				21C0BDB5241592BE000AF871 /* TarkovMarket.app */,
+				21C0BDB5241592BE000AF871 /* Tarkov Market Pal.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -97,9 +97,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		21C0BDB4241592BE000AF871 /* TarkovMarket */ = {
+		21C0BDB4241592BE000AF871 /* Tarkov Market Pal */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 21C0BDC9241592C7000AF871 /* Build configuration list for PBXNativeTarget "TarkovMarket" */;
+			buildConfigurationList = 21C0BDC9241592C7000AF871 /* Build configuration list for PBXNativeTarget "Tarkov Market Pal" */;
 			buildPhases = (
 				99885C99F979757B97255B7E /* [CP] Check Pods Manifest.lock */,
 				21C0BDB1241592BE000AF871 /* Sources */,
@@ -111,9 +111,9 @@
 			);
 			dependencies = (
 			);
-			name = TarkovMarket;
+			name = "Tarkov Market Pal";
 			productName = TarkovMarket;
-			productReference = 21C0BDB5241592BE000AF871 /* TarkovMarket.app */;
+			productReference = 21C0BDB5241592BE000AF871 /* Tarkov Market Pal.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -131,7 +131,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 21C0BDB0241592BE000AF871 /* Build configuration list for PBXProject "TarkovMarket" */;
+			buildConfigurationList = 21C0BDB0241592BE000AF871 /* Build configuration list for PBXProject "Tarkov Market Pal" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -144,7 +144,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				21C0BDB4241592BE000AF871 /* TarkovMarket */,
+				21C0BDB4241592BE000AF871 /* Tarkov Market Pal */,
 			);
 		};
 /* End PBXProject section */
@@ -393,7 +393,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		21C0BDB0241592BE000AF871 /* Build configuration list for PBXProject "TarkovMarket" */ = {
+		21C0BDB0241592BE000AF871 /* Build configuration list for PBXProject "Tarkov Market Pal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				21C0BDC7241592C7000AF871 /* Debug */,
@@ -402,7 +402,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		21C0BDC9241592C7000AF871 /* Build configuration list for PBXNativeTarget "TarkovMarket" */ = {
+		21C0BDC9241592C7000AF871 /* Build configuration list for PBXNativeTarget "Tarkov Market Pal" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				21C0BDCA241592C7000AF871 /* Debug */,
