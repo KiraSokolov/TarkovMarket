@@ -69,56 +69,40 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     
     @IBOutlet weak var spinner: UIActivityIndicatorView!
-    
-    
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var searchTextField: UITextField!
     @IBOutlet weak var microphoneButton: UIButton!
-    
     @IBOutlet weak var bannerView: GADBannerView!
     
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.delegate = self
-        tableView.dataSource = self
-        searchTextField.delegate = self
-        tableView.tableFooterView = UIView()
+        
 
-        spinner.isHidden = true
         bannerView.delegate = self
+        searchTextField.delegate = self
+        tableView.delegate = self
+        speechRecognizer.delegate = self
+        tableView.dataSource = self
         
         
+        tableView.tableFooterView = UIView()
+        spinner.isHidden = true
         
         if traitCollection.userInterfaceStyle == .dark {
             microphoneButton.setTitleColor(.green, for: .normal)
-            
         }
         
         
         searchTextField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        microphoneButton.translatesAutoresizingMaskIntoConstraints = false
-        let height = self.view.bounds.height / 20
-        microphoneButton.heightAnchor.constraint(equalToConstant: height).isActive = true
         
-        microphoneButton.contentMode = .scaleAspectFit
         
-        microphoneButton.setTitle("Tap Here for Voice Activation", for: .normal)
-        microphoneButton.isEnabled = false
-        speechRecognizer.delegate = self
-        
+        configureMicButton()
         self.requestSpeechRecognition()
         
         guard let favouriteArr = UserDefaults.standard.array(forKey: "Favourites") as? [String] else { return }
         favouriteSet = Set(favouriteArr)
         favouritesArray = favouriteArr
-        
-        microphoneButton.layer.borderWidth = 1.5
-        microphoneButton.layer.borderColor = green.cgColor
-        microphoneButton.layer.cornerRadius = 20
-        microphoneButton.layer.shadowColor = UIColor.black.cgColor
-        microphoneButton.layer.shadowOffset = CGSize(width: 5, height: 5)
-        microphoneButton.layer.shadowRadius = 5
-        microphoneButton.layer.shadowOpacity = 0.5
         
         
         bannerView.adUnitID = "ca-app-pub-4857948317177675/1514947091"
@@ -131,6 +115,27 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     func getPrice(of item: String, completion: @escaping () -> ()) {
         
+        // IF THERE IS NO API KEY INSERTED.
+        if self.apiKey == "" {
+             if let path = Bundle.main.url(forResource: "items", withExtension: "json") {
+                do {
+                 let sampleData = try Data(contentsOf: path)
+                 let jsonData = try JSONDecoder().decode([Item].self, from: sampleData)
+                    for item in jsonData {
+                        self.itemArray.insert(item, at: 0)
+                    }
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                 
+                } catch {
+                    print(error)
+                }
+             }
+            
+        } else {
+        
+            // REGULAR FUNCTION WITH API KEY PROVIDED.
         let itemName = "q"
         
         print(#line, item)
@@ -171,7 +176,9 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
                 
                 return }
             
+
             do {
+                
                 let item = try JSONDecoder().decode([Item].self, from: data)
                 for item in item {
                     self.itemArray.insert(item, at: 0)
@@ -186,7 +193,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         }.resume()
         
     }
-    
+    }
     func calculateUpdated(last updated: Date) -> String {
         let timeUpdatedInHours = (updated.distance(to: Date()) / 3600)
         var measureOfTime = 0
@@ -253,6 +260,46 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
     }
     
+    
+    @objc func favourited(sender: UIButton) {
+        let buttonTag = sender.tag
+        
+        
+        
+        if favouriteSet.count < 5 {
+            if !favouriteSet.contains(itemArray[buttonTag].name) {
+                favouriteSet.insert(itemArray[buttonTag].name)
+            } else {
+                favouriteSet.remove(itemArray[buttonTag].name)
+            }
+            favouritesArray = Array(favouriteSet)
+            
+            UserDefaults.standard.set(favouritesArray, forKey: "Favourites")
+        }
+        
+        let indexPosition = IndexPath(row: buttonTag, section: 0)
+        tableView.reloadRows(at: [indexPosition], with: .none)
+        
+        
+    }
+    
+    func configureMicButton() {
+        microphoneButton.translatesAutoresizingMaskIntoConstraints = false
+        microphoneButton.heightAnchor.constraint(equalToConstant: self.view.bounds.height / 20).isActive = true
+        microphoneButton.contentMode = .scaleAspectFit
+        microphoneButton.setTitle("Tap Here for Voice Activation", for: .normal)
+        microphoneButton.isEnabled = false
+        
+        microphoneButton.layer.borderWidth = 1.5
+        microphoneButton.layer.borderColor = green.cgColor
+        microphoneButton.layer.cornerRadius = 20
+        microphoneButton.layer.shadowColor = UIColor.black.cgColor
+        microphoneButton.layer.shadowOffset = CGSize(width: 5, height: 5)
+        microphoneButton.layer.shadowRadius = 5
+        microphoneButton.layer.shadowOpacity = 0.5
+    }
+
+    
     //#PRAGMA MARK: IBACTIONS
     
     @IBAction func microphoneTapped(_ sender: Any?) {
@@ -297,11 +344,11 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         itemArray.removeAll()
         
         if !favouritesArray.isEmpty {
-        for favourite in favouritesArray {
-            getPrice(of: favourite) {
-                self.compareItemArrays(before: 0, after: self.itemArray.count)
+            for favourite in favouritesArray {
+                getPrice(of: favourite) {
+                    self.compareItemArrays(before: 0, after: self.itemArray.count)
+                }
             }
-        }
         } else {
             tableView.reloadData()
         }
@@ -442,7 +489,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             
             tableView.reloadData()
         }
-        //
+        
         if cell.itemImageView.frame.width > cell.itemImageView.frame.height {
             cell.itemImageView.contentMode = .scaleAspectFit
         } else {
@@ -462,30 +509,8 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             cell.favouriteButton.setImage(UIImage(systemName: "star"), for: .normal)
             cell.favouriteButton.setTitle("Add to Favorites", for: .normal)
         }
- 
+        
         return cell
-    }
-    
-    @objc func favourited(sender: UIButton) {
-        let buttonTag = sender.tag
-        
-        
-        
-        if favouriteSet.count < 5 {
-            if !favouriteSet.contains(itemArray[buttonTag].name) {
-                favouriteSet.insert(itemArray[buttonTag].name)
-            } else {
-                favouriteSet.remove(itemArray[buttonTag].name)
-            }
-            favouritesArray = Array(favouriteSet)
-            
-            UserDefaults.standard.set(favouritesArray, forKey: "Favourites")
-        }
-        
-        let indexPosition = IndexPath(row: buttonTag, section: 0)
-        tableView.reloadRows(at: [indexPosition], with: .none)
-        
-        
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -496,11 +521,8 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             
         } else {
             height = tableView.bounds.width / 3.5
-            
         }
-        
-        
-        
+
         return height
     }
     
@@ -558,11 +580,7 @@ extension ViewController: GADBannerViewDelegate {
     func adView(_ bannerView: GADBannerView, didFailToReceiveAdWithError error: GADRequestError) {
         print(error)
     }
-    
-    
-    
-    
-    
+
 }
 
 // #PRAGMA MARK : Speech functions
@@ -601,11 +619,6 @@ extension ViewController {
             recognitionTask?.cancel()
             recognitionTask = nil
             searchTextField.text = ""
-            
-            
-            //
-            
-            
         }
         
         var isRecording : Bool = false
@@ -628,8 +641,6 @@ extension ViewController {
             }
         }
         
-        
-        //        self.microphoneButton.isEnabled = false
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(.record)

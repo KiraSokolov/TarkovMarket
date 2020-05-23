@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2149CC56246E32DD004440EA /* items.json in Resources */ = {isa = PBXBuildFile; fileRef = 2149CC55246E32DD004440EA /* items.json */; };
 		21C0BDB9241592BE000AF871 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C0BDB8241592BE000AF871 /* AppDelegate.swift */; };
 		21C0BDBB241592BE000AF871 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C0BDBA241592BE000AF871 /* SceneDelegate.swift */; };
 		21C0BDBD241592BE000AF871 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C0BDBC241592BE000AF871 /* ViewController.swift */; };
@@ -18,6 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2149CC55246E32DD004440EA /* items.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = items.json; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.json; };
 		21C0BDB5241592BE000AF871 /* Tarkov Market Pal.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tarkov Market Pal.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		21C0BDB8241592BE000AF871 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		21C0BDBA241592BE000AF871 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -44,6 +46,32 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2149CC57246E3AD3004440EA /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				2149CC55246E32DD004440EA /* items.json */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		2149CC58246E3AE9004440EA /* View */ = {
+			isa = PBXGroup;
+			children = (
+				21C0BDBE241592BE000AF871 /* Main.storyboard */,
+				21C0BDCC241A34B2000AF871 /* ItemTableViewCell.swift */,
+				21C0BDC3241592C7000AF871 /* LaunchScreen.storyboard */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		2149CC59246E3AFF004440EA /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				21C0BDBC241592BE000AF871 /* ViewController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
 		21C0BDAC241592BE000AF871 = {
 			isa = PBXGroup;
 			children = (
@@ -65,13 +93,12 @@
 		21C0BDB7241592BE000AF871 /* TarkovMarket */ = {
 			isa = PBXGroup;
 			children = (
-				21C0BDB8241592BE000AF871 /* AppDelegate.swift */,
-				21C0BDBA241592BE000AF871 /* SceneDelegate.swift */,
-				21C0BDBC241592BE000AF871 /* ViewController.swift */,
-				21C0BDBE241592BE000AF871 /* Main.storyboard */,
-				21C0BDCC241A34B2000AF871 /* ItemTableViewCell.swift */,
+				2149CC57246E3AD3004440EA /* Model */,
+				2149CC58246E3AE9004440EA /* View */,
+				2149CC59246E3AFF004440EA /* Controller */,
 				21C0BDC1241592C7000AF871 /* Assets.xcassets */,
-				21C0BDC3241592C7000AF871 /* LaunchScreen.storyboard */,
+				21C0BDBA241592BE000AF871 /* SceneDelegate.swift */,
+				21C0BDB8241592BE000AF871 /* AppDelegate.swift */,
 				21C0BDC6241592C7000AF871 /* Info.plist */,
 			);
 			path = TarkovMarket;
@@ -156,6 +183,7 @@
 			files = (
 				21C0BDC5241592C7000AF871 /* LaunchScreen.storyboard in Resources */,
 				21C0BDC2241592C7000AF871 /* Assets.xcassets in Resources */,
+				2149CC56246E32DD004440EA /* items.json in Resources */,
 				21C0BDC0241592BE000AF871 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
