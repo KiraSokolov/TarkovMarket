@@ -9,6 +9,7 @@
 // app-id ca-app-pub-4857948317177675~9672993935
 // add unit-id ca-app-pub-4857948317177675/1514947091
 
+
 import UIKit
 import Speech
 import GoogleMobileAds
@@ -44,19 +45,28 @@ struct Item : Codable {
     }
 }
 
-class ViewController: UIViewController, SFSpeechRecognizerDelegate {
+class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerViewDelegate, UIPickerViewDataSource {
+
+    
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "en-US"))!
     private let apiKey = ""
     
     var itemArray = [Item]()
     var height : CGFloat = 0.0
+    
+    
     let languageArray = ["en", "ru", "de", "fr", "es", "cn"]
-    var lanuageSelected = "en"
+    var lanuageSelected = UserDefaults.standard.string(forKey: "Language")
+    var blurEffectView : UIVisualEffectView!
+    
     
     
     var favouriteSet : Set<String> = []
     var favouritesArray : [String] = []
+    
+    
+//    var savedLanguage = UserDefaults.standard.string(forKey: "Language")
     
     
     private let audioEngine = AVAudioEngine()
@@ -67,6 +77,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     
     
+    @IBOutlet var languagePickerView: UIView!
     
     @IBOutlet weak var spinner: UIActivityIndicatorView!
     @IBOutlet weak var tableView: UITableView!
@@ -78,6 +89,10 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
+        if lanuageSelected?.count == 0 {
+            print("NONE")
+        }
 
         bannerView.delegate = self
         searchTextField.delegate = self
@@ -320,25 +335,106 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     }
     
     @IBAction func languageButtonPressed(_ sender: Any) {
-        let alert = UIAlertController(title: "", message: "Select a lanauge", preferredStyle: .actionSheet)
+//        let alert = UIAlertController(title: "", message: "Select a lanauge", preferredStyle: .actionSheet)
+//
+//        for lanuage in languageArray {
+//            alert.addAction(UIAlertAction(title: lanuage, style: .default, handler: { (_) in
+//                self.lanuageSelected = lanuage
+//                print(self.lanuageSelected)
+//            }))
+//        }
+//        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+//
+//        if let popoverController = alert.popoverPresentationController {
+//            popoverController.sourceView = self.view
+//            popoverController.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
+//            popoverController.permittedArrowDirections = []
+//        }
+//        self.present(alert, animated: true, completion: nil)
         
-        for lanuage in languageArray {
-            alert.addAction(UIAlertAction(title: lanuage, style: .default, handler: { (_) in
-                self.lanuageSelected = lanuage
-                print(self.lanuageSelected)
-            }))
-        }
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
         
-        if let popoverController = alert.popoverPresentationController {
-            popoverController.sourceView = self.view
-            popoverController.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
-            popoverController.permittedArrowDirections = []
-        }
-        self.present(alert, animated: true, completion: nil)
+        print("PRESSED")
+        animateViewIn()
+
+        
+        
         
         
     }
+    
+    func animateViewIn() {
+        
+        if !UIAccessibility.isReduceTransparencyEnabled {
+            languagePickerView.layer.cornerRadius = 10
+            blurEffectView = UIVisualEffectView(effect: nil)
+            blurEffectView.frame = self.view.bounds
+            blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            self.view.addSubview(blurEffectView)
+
+        } else {
+            view.backgroundColor = .black
+        }
+        self.view.addSubview(languagePickerView)
+        languagePickerView.center = self.view.center
+        languagePickerView.backgroundColor = .gray
+        languagePickerView.alpha = 0
+        self.navigationController?.isNavigationBarHidden = true
+        
+        UIView.animate(withDuration: 0.3) {
+            self.blurEffectView.effect = UIBlurEffect(style: .dark)
+            self.languagePickerView.alpha = 1
+        }
+        
+        
+        
+        
+        
+        
+    }
+    
+    func animateViewOut() {
+        
+
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            self.languagePickerView.alpha = 0
+            self.blurEffectView.effect = nil
+            self.navigationController?.isNavigationBarHidden = false
+        }) { (_) in
+            self.languagePickerView.removeFromSuperview()
+            self.blurEffectView.removeFromSuperview()
+            
+        }
+        
+        
+        
+        
+    }
+    
+    @objc func dismissLanguage(_ sender: UITapGestureRecognizer) {
+        animateViewOut()
+    }
+    
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return languageArray.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return languageArray[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        
+        
+        lanuageSelected = languageArray[row]
+        
+    }
+    
+    
     
     @IBAction func favouriteButtonPressed(_ sender: Any) {
         itemArray.removeAll()
@@ -353,6 +449,15 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
             tableView.reloadData()
         }
     }
+    
+    
+    @IBAction func submitLangButtonPressed(_ sender: Any) {
+        
+        
+        animateViewOut()
+        
+    }
+    
     
     @IBAction func commandsButtonPressed(_ sender: UIButton) {
         
