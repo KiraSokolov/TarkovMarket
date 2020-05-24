@@ -9,6 +9,7 @@
 // app-id ca-app-pub-4857948317177675~9672993935
 // add unit-id ca-app-pub-4857948317177675/1514947091
 
+
 import UIKit
 import Speech
 import GoogleMobileAds
@@ -44,19 +45,28 @@ struct Item : Codable {
     }
 }
 
-class ViewController: UIViewController, SFSpeechRecognizerDelegate {
+class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UIGestureRecognizerDelegate {
+    
+    
     
     private let speechRecognizer = SFSpeechRecognizer(locale: Locale.init(identifier: "en-US"))!
     private let apiKey = ""
     
     var itemArray = [Item]()
     var height : CGFloat = 0.0
+    
+    
     let languageArray = ["en", "ru", "de", "fr", "es", "cn"]
-    var lanuageSelected = "en"
+    var languageSelected = UserDefaults.standard.string(forKey: "Language")
+    var blurEffectView : UIVisualEffectView!
+    var dismissLangTapGesture : UITapGestureRecognizer!
     
     
     var favouriteSet : Set<String> = []
     var favouritesArray : [String] = []
+    
+    
+    //    var savedLanguage = UserDefaults.standard.string(forKey: "Language")
     
     
     private let audioEngine = AVAudioEngine()
@@ -67,27 +77,34 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     
     
+    @IBOutlet var languagePickerView: UIView!
     
     @IBOutlet weak var spinner: UIActivityIndicatorView!
-    
-    
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var searchTextField: UITextField!
     @IBOutlet weak var microphoneButton: UIButton!
-    
     @IBOutlet weak var bannerView: GADBannerView!
+    @IBOutlet weak var submitLangButton: UIButton!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.delegate = self
-        tableView.dataSource = self
-        searchTextField.delegate = self
-        tableView.tableFooterView = UIView()
-
-        spinner.isHidden = true
+        
+        
         bannerView.delegate = self
+        searchTextField.delegate = self
+        tableView.delegate = self
+        speechRecognizer.delegate = self
+        tableView.dataSource = self
         
         
+        bannerView.adUnitID = "ca-app-pub-4857948317177675/1514947091"
+        bannerView.rootViewController = self
+        bannerView.load(GADRequest())
+        
+        
+        tableView.tableFooterView = UIView()
+        spinner.isHidden = true
         
         if traitCollection.userInterfaceStyle == .dark {
             microphoneButton.setTitleColor(.green, for: .normal)
@@ -96,34 +113,22 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
         
         searchTextField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        microphoneButton.translatesAutoresizingMaskIntoConstraints = false
-        let height = self.view.bounds.height / 20
-        microphoneButton.heightAnchor.constraint(equalToConstant: height).isActive = true
         
-        microphoneButton.contentMode = .scaleAspectFit
         
-        microphoneButton.setTitle("Tap Here for Voice Activation", for: .normal)
-        microphoneButton.isEnabled = false
-        speechRecognizer.delegate = self
-        
+        configureMicButton()
         self.requestSpeechRecognition()
+        
+        
+        
+        if languageSelected == nil {
+            UserDefaults.standard.set("en", forKey: "Language")
+        }
+        
+        
         
         guard let favouriteArr = UserDefaults.standard.array(forKey: "Favourites") as? [String] else { return }
         favouriteSet = Set(favouriteArr)
         favouritesArray = favouriteArr
-        
-        microphoneButton.layer.borderWidth = 1.5
-        microphoneButton.layer.borderColor = green.cgColor
-        microphoneButton.layer.cornerRadius = 20
-        microphoneButton.layer.shadowColor = UIColor.black.cgColor
-        microphoneButton.layer.shadowOffset = CGSize(width: 5, height: 5)
-        microphoneButton.layer.shadowRadius = 5
-        microphoneButton.layer.shadowOpacity = 0.5
-        
-        
-        bannerView.adUnitID = "ca-app-pub-4857948317177675/1514947091"
-        bannerView.rootViewController = self
-        bannerView.load(GADRequest())
         
         
     }
@@ -131,62 +136,85 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     
     func getPrice(of item: String, completion: @escaping () -> ()) {
         
-        let itemName = "q"
-        
-        print(#line, item)
-        self.spinner.isHidden = false
-        self.spinner.startAnimating()
-        
-        var components = URLComponents()
-        components.scheme = "https"
-        components.host = "tarkov-market.com"
-        components.path = "/api/v1/item"
-        let queryItemName = URLQueryItem(name: itemName, value: item)
-        let queryLanguage = URLQueryItem(name: "lang", value: lanuageSelected)
-        components.queryItems = [queryItemName, queryLanguage]
-        
-        
-        let session = URLSession.shared
-        guard let url = components.url else { return }
-        var request = URLRequest(url: url)
-        request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
-        //        request.addValue("btc", forHTTPHeaderField: "q")
-        
-        session.dataTask(with: request) { (data, response, error) in
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else {
-                
-                DispatchQueue.main.async {
-                    
-                    let errorAlert = UIAlertController(title: "Error has occured", message: "Please try again.", preferredStyle: .alert)
-                    
-                    self.present(errorAlert, animated: true, completion: nil)
-                    let dismissTimer = DispatchTime.now() + 1.5
-                    DispatchQueue.main.asyncAfter(deadline: dismissTimer) {
-                        
-                        errorAlert.dismiss(animated: true, completion: nil)
-                        self.spinner.isHidden = true
-                        self.spinner.stopAnimating()
+        // IF THERE IS NO API KEY INSERTED.
+        if self.apiKey == "" {
+            if let path = Bundle.main.url(forResource: "items", withExtension: "json") {
+                do {
+                    let sampleData = try Data(contentsOf: path)
+                    let jsonData = try JSONDecoder().decode([Item].self, from: sampleData)
+                    for item in jsonData {
+                        self.itemArray.insert(item, at: 0)
                     }
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                    
+                } catch {
+                    print(error)
                 }
-                
-                return }
-            
-            do {
-                let item = try JSONDecoder().decode([Item].self, from: data)
-                for item in item {
-                    self.itemArray.insert(item, at: 0)
-                }
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                }
-            } catch {
-                print(error.localizedDescription)
             }
-            completion()
-        }.resume()
-        
+            
+        } else {
+            
+            // REGULAR FUNCTION WITH API KEY PROVIDED.
+            let itemName = "q"
+            
+            print(#line, item)
+            self.spinner.isHidden = false
+            self.spinner.startAnimating()
+            
+            var components = URLComponents()
+            components.scheme = "https"
+            components.host = "tarkov-market.com"
+            components.path = "/api/v1/item"
+            let queryItemName = URLQueryItem(name: itemName, value: item)
+            let queryLanguage = URLQueryItem(name: "lang", value: languageSelected)
+            components.queryItems = [queryItemName, queryLanguage]
+            
+            
+            let session = URLSession.shared
+            guard let url = components.url else { return }
+            var request = URLRequest(url: url)
+            request.addValue(apiKey, forHTTPHeaderField: "x-api-key")
+            //        request.addValue("btc", forHTTPHeaderField: "q")
+            
+            session.dataTask(with: request) { (data, response, error) in
+                guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200, let data = data else {
+                    
+                    DispatchQueue.main.async {
+                        
+                        let errorAlert = UIAlertController(title: "Error has occured", message: "Please try again.", preferredStyle: .alert)
+                        
+                        self.present(errorAlert, animated: true, completion: nil)
+                        let dismissTimer = DispatchTime.now() + 1.5
+                        DispatchQueue.main.asyncAfter(deadline: dismissTimer) {
+                            
+                            errorAlert.dismiss(animated: true, completion: nil)
+                            self.spinner.isHidden = true
+                            self.spinner.stopAnimating()
+                        }
+                    }
+                    
+                    return }
+                
+                
+                do {
+                    
+                    let item = try JSONDecoder().decode([Item].self, from: data)
+                    for item in item {
+                        self.itemArray.insert(item, at: 0)
+                    }
+                    DispatchQueue.main.async {
+                        self.tableView.reloadData()
+                    }
+                } catch {
+                    print(error.localizedDescription)
+                }
+                completion()
+            }.resume()
+            
+        }
     }
-    
     func calculateUpdated(last updated: Date) -> String {
         let timeUpdatedInHours = (updated.distance(to: Date()) / 3600)
         var measureOfTime = 0
@@ -253,6 +281,122 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
         
     }
     
+    
+    @objc func favourited(sender: UIButton) {
+        let buttonTag = sender.tag
+        
+        
+        
+        if favouriteSet.count < 5 {
+            if !favouriteSet.contains(itemArray[buttonTag].name) {
+                favouriteSet.insert(itemArray[buttonTag].name)
+            } else {
+                favouriteSet.remove(itemArray[buttonTag].name)
+            }
+            favouritesArray = Array(favouriteSet)
+            
+            UserDefaults.standard.set(favouritesArray, forKey: "Favourites")
+        }
+        
+        let indexPosition = IndexPath(row: buttonTag, section: 0)
+        tableView.reloadRows(at: [indexPosition], with: .none)
+        
+        
+    }
+    
+    func configureMicButton() {
+        microphoneButton.translatesAutoresizingMaskIntoConstraints = false
+        microphoneButton.heightAnchor.constraint(equalToConstant: self.view.bounds.height / 20).isActive = true
+        microphoneButton.contentMode = .scaleAspectFit
+        microphoneButton.setTitle("Tap Here for Voice Activation", for: .normal)
+        microphoneButton.isEnabled = false
+        
+        microphoneButton.layer.borderWidth = 1.5
+        microphoneButton.layer.borderColor = green.cgColor
+        microphoneButton.layer.cornerRadius = 20
+        microphoneButton.layer.shadowColor = UIColor.black.cgColor
+        microphoneButton.layer.shadowOffset = CGSize(width: 5, height: 5)
+        microphoneButton.layer.shadowRadius = 5
+        microphoneButton.layer.shadowOpacity = 0.5
+        
+        submitLangButton.layer.cornerRadius = 5
+        submitLangButton.layer.borderWidth = 1
+        submitLangButton.layer.borderColor = UIColor.black.cgColor
+    }
+    
+    //#PRAGMA MARK: LANGUAGE VIEW FUNCTIONS
+    func animateViewIn() {
+        
+        if !UIAccessibility.isReduceTransparencyEnabled {
+            languagePickerView.layer.cornerRadius = 10
+            blurEffectView = UIVisualEffectView(effect: nil)
+            blurEffectView.frame = self.view.bounds
+            blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+            self.view.addSubview(blurEffectView)
+            
+        } else {
+            view.backgroundColor = .black
+        }
+        self.view.addSubview(languagePickerView)
+        languagePickerView.center = self.view.center
+        languagePickerView.backgroundColor = .gray
+        languagePickerView.alpha = 0
+        self.navigationController?.isNavigationBarHidden = true
+        
+        dismissLangTapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissLanguage(_:)))
+        self.view.addGestureRecognizer(dismissLangTapGesture)
+        dismissLangTapGesture.delegate = self
+        
+        UIView.animate(withDuration: 0.3) {
+            self.blurEffectView.effect = UIBlurEffect(style: .dark)
+            self.languagePickerView.alpha = 1
+        }
+        
+    }
+    
+    func animateViewOut() {
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            self.languagePickerView.alpha = 0
+            self.blurEffectView.effect = nil
+            self.navigationController?.isNavigationBarHidden = false
+        }) { (_) in
+            self.languagePickerView.removeFromSuperview()
+            self.blurEffectView.removeFromSuperview()
+            self.view.removeGestureRecognizer(self.dismissLangTapGesture)
+            
+        }
+        
+    }
+    
+    @objc func dismissLanguage(_ sender: UITapGestureRecognizer) {
+        animateViewOut()
+    }
+    
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return languageArray.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return languageArray[row]
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        
+        
+        languageSelected = languageArray[row]
+        
+        
+        
+    }
+    
+    
+    
+    
     //#PRAGMA MARK: IBACTIONS
     
     @IBAction func microphoneTapped(_ sender: Any?) {
@@ -273,49 +417,48 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate {
     }
     
     @IBAction func languageButtonPressed(_ sender: Any) {
-        let alert = UIAlertController(title: "", message: "Select a lanauge", preferredStyle: .actionSheet)
         
-        for lanuage in languageArray {
-            alert.addAction(UIAlertAction(title: lanuage, style: .default, handler: { (_) in
-                self.lanuageSelected = lanuage
-                print(self.lanuageSelected)
-            }))
-        }
-        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        
-        if let popoverController = alert.popoverPresentationController {
-            popoverController.sourceView = self.view
-            popoverController.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
-            popoverController.permittedArrowDirections = []
-        }
-        self.present(alert, animated: true, completion: nil)
-        
+        animateViewIn()
         
     }
+    
     
     @IBAction func favouriteButtonPressed(_ sender: Any) {
         itemArray.removeAll()
         
         if !favouritesArray.isEmpty {
-        for favourite in favouritesArray {
-            getPrice(of: favourite) {
-                self.compareItemArrays(before: 0, after: self.itemArray.count)
+            for favourite in favouritesArray {
+                getPrice(of: favourite) {
+                    self.compareItemArrays(before: 0, after: self.itemArray.count)
+                }
             }
-        }
         } else {
             tableView.reloadData()
         }
     }
     
+    
+    @IBAction func submitLangButtonPressed(_ sender: Any) {
+        
+        UserDefaults.standard.set(languageSelected, forKey: "Language")
+        animateViewOut()
+        
+    }
+    
+    
     @IBAction func commandsButtonPressed(_ sender: UIButton) {
         
         let commandsString = """
-"Search" after the item name to search
-"Reset" to start over
-"Cancel" to end voice recognition
+Say "search" after the item name to search
+Say "reset" to start over
+Say "cancel" to end voice recognition
+
+Try to be more specific or speak clearly if you can't find what you are looking for.
+Thank you for your support!
 """
         
-        let alert = UIAlertController(title: "Say", message: commandsString, preferredStyle: .alert)
+        
+        let alert = UIAlertController(title: "Info", message: commandsString, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
         self.present(alert, animated: true, completion: nil)
         
@@ -442,7 +585,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             
             tableView.reloadData()
         }
-        //
+        
         if cell.itemImageView.frame.width > cell.itemImageView.frame.height {
             cell.itemImageView.contentMode = .scaleAspectFit
         } else {
@@ -462,30 +605,12 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             cell.favouriteButton.setImage(UIImage(systemName: "star"), for: .normal)
             cell.favouriteButton.setTitle("Add to Favorites", for: .normal)
         }
- 
-        return cell
-    }
-    
-    @objc func favourited(sender: UIButton) {
-        let buttonTag = sender.tag
         
-        
-        
-        if favouriteSet.count < 5 {
-            if !favouriteSet.contains(itemArray[buttonTag].name) {
-                favouriteSet.insert(itemArray[buttonTag].name)
-            } else {
-                favouriteSet.remove(itemArray[buttonTag].name)
-            }
-            favouritesArray = Array(favouriteSet)
-            
-            UserDefaults.standard.set(favouritesArray, forKey: "Favourites")
+        if traitCollection.userInterfaceStyle == .dark {
+            cell.favouriteButton.setTitleColor(.white, for: .normal)
         }
         
-        let indexPosition = IndexPath(row: buttonTag, section: 0)
-        tableView.reloadRows(at: [indexPosition], with: .none)
-        
-        
+        return cell
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -496,10 +621,7 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
             
         } else {
             height = tableView.bounds.width / 3.5
-            
         }
-        
-        
         
         return height
     }
@@ -559,10 +681,6 @@ extension ViewController: GADBannerViewDelegate {
         print(error)
     }
     
-    
-    
-    
-    
 }
 
 // #PRAGMA MARK : Speech functions
@@ -601,11 +719,6 @@ extension ViewController {
             recognitionTask?.cancel()
             recognitionTask = nil
             searchTextField.text = ""
-            
-            
-            //
-            
-            
         }
         
         var isRecording : Bool = false
@@ -628,8 +741,6 @@ extension ViewController {
             }
         }
         
-        
-        //        self.microphoneButton.isEnabled = false
         let audioSession = AVAudioSession.sharedInstance()
         do {
             try audioSession.setCategory(.record)
