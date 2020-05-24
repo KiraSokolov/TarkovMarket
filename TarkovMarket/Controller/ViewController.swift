@@ -108,6 +108,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerView
         
         if traitCollection.userInterfaceStyle == .dark {
             microphoneButton.setTitleColor(.green, for: .normal)
+            
         }
         
         
@@ -344,24 +345,11 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerView
     }
     
     @IBAction func languageButtonPressed(_ sender: Any) {
-//        let alert = UIAlertController(title: "", message: "Select a lanauge", preferredStyle: .actionSheet)
-//
-//        for lanuage in languageArray {
-//            alert.addAction(UIAlertAction(title: lanuage, style: .default, handler: { (_) in
-//                self.lanuageSelected = lanuage
-//                print(self.lanuageSelected)
-//            }))
-//        }
-//        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-//
-//        if let popoverController = alert.popoverPresentationController {
-//            popoverController.sourceView = self.view
-//            popoverController.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
-//            popoverController.permittedArrowDirections = []
-//        }
-//        self.present(alert, animated: true, completion: nil)
+
         
         animateViewIn()
+        
+        
    
     }
     
@@ -480,6 +468,7 @@ Try to be more specific or speak clearly if you can't find what you are looking 
 Thank you for your support!
 """
         
+
         let alert = UIAlertController(title: "Info", message: commandsString, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
         self.present(alert, animated: true, completion: nil)
@@ -626,6 +615,10 @@ extension ViewController : UITableViewDataSource, UITableViewDelegate, UITextFie
         } else {
             cell.favouriteButton.setImage(UIImage(systemName: "star"), for: .normal)
             cell.favouriteButton.setTitle("Add to Favorites", for: .normal)
+        }
+        
+        if traitCollection.userInterfaceStyle == .dark {
+            cell.favouriteButton.setTitleColor(.white, for: .normal)
         }
         
         return cell
