@@ -45,7 +45,7 @@ struct Item : Codable {
     }
 }
 
-class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerViewDelegate, UIPickerViewDataSource {
+class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerViewDelegate, UIPickerViewDataSource, UIGestureRecognizerDelegate {
 
     
     
@@ -57,9 +57,9 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerView
     
     
     let languageArray = ["en", "ru", "de", "fr", "es", "cn"]
-    var lanuageSelected = UserDefaults.standard.string(forKey: "Language")
+    var languageSelected = UserDefaults.standard.string(forKey: "Language")
     var blurEffectView : UIVisualEffectView!
-    
+    var dismissLangTapGesture : UITapGestureRecognizer!
     
     
     var favouriteSet : Set<String> = []
@@ -84,21 +84,23 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerView
     @IBOutlet weak var searchTextField: UITextField!
     @IBOutlet weak var microphoneButton: UIButton!
     @IBOutlet weak var bannerView: GADBannerView!
+    @IBOutlet weak var submitLangButton: UIButton!
     
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        
-        if lanuageSelected?.count == 0 {
-            print("NONE")
-        }
+
 
         bannerView.delegate = self
         searchTextField.delegate = self
         tableView.delegate = self
         speechRecognizer.delegate = self
         tableView.dataSource = self
+        
+
+        bannerView.adUnitID = "ca-app-pub-4857948317177675/1514947091"
+        bannerView.rootViewController = self
+        bannerView.load(GADRequest())
         
         
         tableView.tableFooterView = UIView()
@@ -115,16 +117,19 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerView
         configureMicButton()
         self.requestSpeechRecognition()
         
+        
+        
+        if languageSelected == nil {
+            UserDefaults.standard.set("en", forKey: "Language")
+        }
+
+        
+        
         guard let favouriteArr = UserDefaults.standard.array(forKey: "Favourites") as? [String] else { return }
         favouriteSet = Set(favouriteArr)
         favouritesArray = favouriteArr
-        
-        
-        bannerView.adUnitID = "ca-app-pub-4857948317177675/1514947091"
-        bannerView.rootViewController = self
-        bannerView.load(GADRequest())
-        
-        
+
+
     }
     
     
@@ -162,7 +167,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerView
         components.host = "tarkov-market.com"
         components.path = "/api/v1/item"
         let queryItemName = URLQueryItem(name: itemName, value: item)
-        let queryLanguage = URLQueryItem(name: "lang", value: lanuageSelected)
+        let queryLanguage = URLQueryItem(name: "lang", value: languageSelected)
         components.queryItems = [queryItemName, queryLanguage]
         
         
@@ -312,6 +317,10 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerView
         microphoneButton.layer.shadowOffset = CGSize(width: 5, height: 5)
         microphoneButton.layer.shadowRadius = 5
         microphoneButton.layer.shadowOpacity = 0.5
+        
+        submitLangButton.layer.cornerRadius = 5
+        submitLangButton.layer.borderWidth = 1
+        submitLangButton.layer.borderColor = UIColor.black.cgColor
     }
 
     
@@ -352,14 +361,8 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerView
 //        }
 //        self.present(alert, animated: true, completion: nil)
         
-        
-        print("PRESSED")
         animateViewIn()
-
-        
-        
-        
-        
+   
     }
     
     func animateViewIn() {
@@ -379,6 +382,10 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerView
         languagePickerView.backgroundColor = .gray
         languagePickerView.alpha = 0
         self.navigationController?.isNavigationBarHidden = true
+        
+        dismissLangTapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissLanguage(_:)))
+        self.view.addGestureRecognizer(dismissLangTapGesture)
+        dismissLangTapGesture.delegate = self
         
         UIView.animate(withDuration: 0.3) {
             self.blurEffectView.effect = UIBlurEffect(style: .dark)
@@ -403,6 +410,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerView
         }) { (_) in
             self.languagePickerView.removeFromSuperview()
             self.blurEffectView.removeFromSuperview()
+            self.view.removeGestureRecognizer(self.dismissLangTapGesture)
             
         }
         
@@ -430,7 +438,9 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerView
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         
         
-        lanuageSelected = languageArray[row]
+        languageSelected = languageArray[row]
+        
+
         
     }
     
@@ -453,7 +463,7 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerView
     
     @IBAction func submitLangButtonPressed(_ sender: Any) {
         
-        
+        UserDefaults.standard.set(languageSelected, forKey: "Language")
         animateViewOut()
         
     }
@@ -462,12 +472,15 @@ class ViewController: UIViewController, SFSpeechRecognizerDelegate, UIPickerView
     @IBAction func commandsButtonPressed(_ sender: UIButton) {
         
         let commandsString = """
-"Search" after the item name to search
-"Reset" to start over
-"Cancel" to end voice recognition
+Say "search" after the item name to search
+Say "reset" to start over
+Say "cancel" to end voice recognition
+
+Try to be more specific or speak clearly if you can't find what you are looking for.
+Thank you for your support!
 """
         
-        let alert = UIAlertController(title: "Say", message: commandsString, preferredStyle: .alert)
+        let alert = UIAlertController(title: "Info", message: commandsString, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
         self.present(alert, animated: true, completion: nil)
         
